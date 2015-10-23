@@ -1,0 +1,35 @@
+<?php
+
+function campaignion_logcrm_libraries_info() {
+  $libraries['dflydev-hawk'] = [
+    'name' => 'Hawk — A PHP Implementation',
+    'vendor url' => 'https://github.com/dflydev/dflydev-hawk',
+    'download url' => 'https://github.com/dflydev/dflydev-hawk',
+    'version' => '0.0.0',
+    'xautoload' => function($adapter) {
+       $adapter->composerJson('composer.json');
+    },
+    'dependencies' => ['RandomLib (>=1.0)'],
+  ];
+  $libraries['RandomLib'] = [
+    'name' => 'RandomLib — A library for generating random numbers and strings of various strengths.',
+    'vendor url' => 'https://github.com/ircmaxell/RandomLib',
+    'download url' => 'https://github.com/ircmaxell/RandomLib',
+    'version' => '1.1.0',
+    'xautoload' => function($adapter) {
+       $adapter->composerJson('composer.json');
+    },
+    'dependencies' => ['SecurityLib (>=1.1)'],
+  ];
+  $libraries['SecurityLib'] = [
+    'name' => 'SecurityLib',
+    'vendor url' => 'https://github.com/ircmaxell/SecurityLib',
+    'download url' => 'https://github.com/ircmaxell/SecurityLib',
+    'version' => '1.1.0',
+    'xautoload' => function($adapter) {
+       $adapter->composerJson('composer.json');
+    },
+  ];
+  return $libraries;
+}
+

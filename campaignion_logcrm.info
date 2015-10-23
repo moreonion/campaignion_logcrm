@@ -1,0 +1,7 @@
+name = Campaignion LogCRM
+description = Integration module for LogCRM: Send events to LogCRM and let it tag contacts.
+core = 7.x
+php = 5.4
+
+dependencies[] = libraries
+dependencies[] = xautoload (>= 7.x-5.0)
