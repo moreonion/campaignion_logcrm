@@ -1,5 +1,11 @@
 <?php
 
+use \Drupal\little_helpers\Webform\Submission;
+use \Drupal\webform_paymethod_select\WebformPaymentContext;
+
+use \Drupal\campaignion_logcrm\Client;
+use \Drupal\campaignion_logcrm\Event;
+
 function campaignion_logcrm_libraries_info() {
   $libraries['dflydev-hawk'] = [
     'name' => 'Hawk — A PHP Implementation',
@@ -33,3 +39,27 @@ function campaignion_logcrm_libraries_info() {
   return $libraries;
 }
 
+function campaignion_logcrm_webform_submission_insert($node, $submission) {
+  // Send submission event.
+  $e = Event::fromSubmission(new Submission($node, $submission));
+  Client::fromConfig()->sendEvent($e);
+}
+
+function campaignion_logcrm_webform_submission_update($node, $submission) {
+  // Resend submission event.
+  $e = Event::fromSubmission(new Submission($node, $submission));
+  Client::fromConfig()->sendEvent($e);
+}
+
+/**
+ * Implements hook_payment_status_change().
+ */
+function campaignion_logcrm_payment_status_change(Payment $payment, PaymentStatusItem $previous_status_item) {
+  $statusChangedToSuccess = $payment->getStatus()->status == PAYMENT_STATUS_SUCCESS && $previous_status_item->status != PAYMENT_STATUS_SUCCESS;
+  $hasContextObj = $payment->contextObj instanceof WebformPaymentContext;
+  if (!$statusChangedToSuccess || !$hasContextObj)
+    return;
+  // Send payment event.
+  $e = Event::fromPayment($payment);
+  Client::fromConfig()->sendEvent($e);
+}

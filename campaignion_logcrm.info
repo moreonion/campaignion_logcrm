@@ -4,4 +4,6 @@ core = 7.x
 php = 5.4
 
 dependencies[] = libraries
+dependencies[] = webform_paymethod_select
+dependencies[] = webform_submission_uuid
 dependencies[] = xautoload (>= 7.x-5.0)
