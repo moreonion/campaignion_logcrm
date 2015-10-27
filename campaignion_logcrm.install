@@ -1,0 +1,40 @@
+<?php
+
+function campaignion_logcrm_schema() {
+  $tables['campaignion_logcrm_queue'] = [
+    'description' => 'Send queue for logcrm events.',
+    'fields' => [
+      'type' => [
+        'description' => 'Type of data to be sent (ie, webform_submission, payment).',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'id' => array(
+        'description' => 'The ID for the data item.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the queue item was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'locked' => array(
+        'description' => 'This queue item is locked until this time.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'event' => array(
+        'description' => 'Serialized LogCRM event.',
+        'type' => 'blob',
+        'size' => 'big',
+      ),
+    ],
+    'primary key' => array('type', 'id'),
+  ];
+  return $tables;
+}

@@ -3,6 +3,7 @@ description = Integration module for LogCRM: Send events to LogCRM and let it ta
 core = 7.x
 php = 5.4
 
+dependencies[] = elysia_cron
 dependencies[] = libraries
 dependencies[] = webform_paymethod_select
 dependencies[] = webform_submission_uuid

@@ -5,7 +5,25 @@ use \Drupal\webform_paymethod_select\WebformPaymentContext;
 
 use \Drupal\campaignion_logcrm\Client;
 use \Drupal\campaignion_logcrm\Event;
+use \Drupal\campaignion_logcrm\QueueItem;
 
+/**
+ * Implements hook_cronapi().
+ */
+function campaignion_logcrm_cronapi($op, $job = NULL) {
+  $items['campaignion_logcrm_send_queue'] = array(
+    'description' => 'Send queue data to logcrm',
+    'rule' => '*/2 * * * *',
+    'weight' => 100,
+    'file' => 'cron.php',
+    'callback' => '\Drupal\campaignion_logcrm\send_queue',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
 function campaignion_logcrm_libraries_info() {
   $libraries['dflydev-hawk'] = [
     'name' => 'Hawk — A PHP Implementation',
@@ -42,13 +60,15 @@ function campaignion_logcrm_libraries_info() {
 function campaignion_logcrm_webform_submission_insert($node, $submission) {
   // Send submission event.
   $e = Event::fromSubmission(new Submission($node, $submission));
-  Client::fromConfig()->sendEvent($e);
+  QueueItem::byData([
+    'type' => 'webform_submission',
+    'id' => $submission->sid,
+    'event' => $e,
+  ])->save();
 }
 
 function campaignion_logcrm_webform_submission_update($node, $submission) {
-  // Resend submission event.
-  $e = Event::fromSubmission(new Submission($node, $submission));
-  Client::fromConfig()->sendEvent($e);
+  campaignion_logcrm_webform_submission_insert($node, $submission);
 }
 
 /**
@@ -61,5 +81,10 @@ function campaignion_logcrm_payment_status_change(Payment $payment, PaymentStatu
     return;
   // Send payment event.
   $e = Event::fromPayment($payment);
-  Client::fromConfig()->sendEvent($e);
+  QueueItem::byData([
+    'type' => 'payment',
+    'id' => $payment->pid,
+    'event' => $e,
+  ])->save();
 }
+

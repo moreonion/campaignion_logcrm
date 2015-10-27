@@ -14,7 +14,7 @@ class Client {
     $c = variable_get('campaignion_logcrm_credentials', []);
     foreach (['events_url', 'public_key', 'secret_key'] as $v) {
       if (!isset($c[$v])) {
-        throw new ApiError(
+        throw new ApiConfigError(
           'No valid logcrm credentials found. The credentials must contain ' .
           'at least values for "event_url", "public_key" and "private_key".'
         );
@@ -54,13 +54,7 @@ class Client {
     $r = drupal_http_request($this->url, $options);
     if ($r->code != 200) {
       $d = \drupal_json_decode($r->data);
-      $msg = 'API-call failed with: @code @status: @message';
-      $args = [
-        '@code' => $r->code,
-        '@status' => $r->status_message,
-        '@message' => $d['message'],
-      ];
-      throw new ApiError(format_string($msg, $args));
+      throw new ApiError($r->code, $r->status_message, $d['message']);
     }
   }
 
