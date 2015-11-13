@@ -52,6 +52,10 @@ class Client {
     $options['data'] = $json;
     $options['method'] = 'POST';
     $r = drupal_http_request($this->url, $options);
+    if ($r->code < 0) {
+      // Some kind of connection error.
+      throw new ApiError($r->code, $r->error, '');
+    }
     if ($r->code != 200) {
       $d = \drupal_json_decode($r->data);
       throw new ApiError($r->code, $r->status_message, $d['message']);

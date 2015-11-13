@@ -1,6 +1,7 @@
 <?php
 
 use \Drupal\campaignion\ContactTypeManager;
+use \Drupal\campaignion\NoEmailException;
 use \Drupal\campaignion\CRM\Import\Source\ArraySource;
 use \Drupal\little_helpers\Webform\Submission;
 use \Drupal\webform_paymethod_select\WebformPaymentContext;
@@ -90,12 +91,17 @@ function campaignion_logcrm_post_event($event, $signature) {
 
   $importer = ContactTypeManager::instance()->importer('campaignion_logcrm');
   $source = new ArraySource($data);
-  $contact = $importer->findOrCreateContact($source);
-  if ($importer->import($source, $contact)) {
-    $contact->save();
-    return (object) ['code' => 200,  'message' => 'Contact saved.'];
+  try {
+    $contact = $importer->findOrCreateContact($source);
+    if ($importer->import($source, $contact)) {
+      $contact->save();
+      return (object) ['code' => 200,  'message' => 'Contact saved.'];
+    }
+    return (object) ['code' => 200,  'message' => 'Contact unchanged.'];
   }
-  return (object) ['code' => 200,  'message' => 'Contact unchanged.'];
+  catch (NoEmailException $e) {
+    return (object) ['code' => 404, 'message' => 'Missing email in record.'];
+  }
 }
 
 /**
