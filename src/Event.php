@@ -5,26 +5,42 @@ namespace Drupal\campaignion_logcrm;
 use \Drupal\little_helpers\Webform\Submission;
 
 class Event {
+  protected $type;
   protected $date;
   protected $data;
 
-  public static function fromSubmission(Submission $submission) {
+  public static function actionData(Submission $submission) {
+    return [
+      'uuid' => $submission->node->uuid,
+      'title' => $submission->node->title,
+      'needs_confirmation' => $submission->webform->needsConfirmation(),
+      'type' => $submission->node->type,
+      'type_title' => node_type_get_name($submission->node),
+    ];
+  }
+
+  public static function fromSubmission(Submission $submission, $type = 'form_submission') {
     $data = [];
     foreach ($submission->node->webform['components'] as $cid => $component) {
       if ($value = $submission->valueByCid($cid)) {
         $data[$component['form_key']] = $submission->valueByCid($cid);
       }
+      $data['action'] = static::actionData($submission);
     }
     $data['uuid'] = $submission->uuid;
-    return new static($submission->submitted, $data);
+    return new static($type, $submission->submitted, $data);
   }
 
-  public static function fromPayment(\Payment $payment) {
+  public static function fromSubmissionConfirmation(Submission $submission, $type = 'form_submission_confirmed') {
+    return new static($type, time(), [
+      'uuid' => $submission->uuid,
+    ]);
+  }
+
+  public static function fromPayment(\Payment $payment, $type = 'payment_success') {
     $submission_obj = $payment->contextObj->getSubmission();
     $data['uuid'] = $submission_obj->uuid;
-    $node = $submission_obj->node;
-    $data['action']['uuid'] = $node->uuid;
-    $data['action']['title'] = $node->title;
+    $data['action'] = static::actionData($submission_obj);
     $data['pid'] = $payment->pid;
     $status = $payment->getStatus();
     $data['currency_code'] = $payment->currency_code;
@@ -33,16 +49,20 @@ class Event {
     $data['method_specific'] = $payment->method->title_specific;
     $data['method_generic'] = $payment->method->title_generic;
     $data['controller'] = $payment->method->controller->name;
-    return new static($status->created, $data);
+    return new static($type, $status->created, $data);
   }
 
-  public function __construct($date = NULL, $data = []) {
+  public function __construct($type, $date = NULL, $data = []) {
+    $this->type = $type;
     $this->date = $date;
     $this->data = $data;
   }
 
   public function toArray() {
     $d = $this->date ?: time();
-    return $this->data + ['date' => date('c', $d)];
+    return [
+      'type' => $this->type,
+      'date' => date('c', $d),
+    ] + $this->data;
   }
 }

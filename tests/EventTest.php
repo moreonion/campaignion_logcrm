@@ -16,13 +16,40 @@ class SubmissionStub extends Submission {
 }
 
 class EventTest extends \DrupalUnitTestCase {
+  public function test_fromSubmissionConfirmation() {
+    $s = (object) [
+      'uuid' => 'test-uuid',
+      'submitted' => 1445948845,
+      'node' => (object) [
+        'nid' => 1,
+        'uuid' => 'test-node-uuid',
+        'title' => 'Test title',
+        'type' => 'node_type',
+        'webform' => ['components' => [
+          1 => ['cid' => 1, 'form_key' => 'text'],
+          2 => ['cid' => 2, 'form_key' => 'number'],
+          3 => ['cid' => 3, 'form_key' => 'nothing'],
+        ]],
+      ],
+    ];
+    $submission = new SubmissionStub($s->node, $s, []);
+    $d = Event::fromSubmissionConfirmation($submission)->toArray();
+    unset($d['date']);
+    $this->assertEquals([
+      'type' => 'form_submission_confirmed',
+      'uuid' => 'test-uuid',
+    ], $d);
+  }
+
   public function test_fromSubmission() {
     $s = (object) [
       'uuid' => 'test-uuid',
       'submitted' => 1445948845,
       'node' => (object) [
+        'nid' => 1,
         'uuid' => 'test-node-uuid',
         'title' => 'Test title',
+        'type' => 'node_type',
         'webform' => ['components' => [
           1 => ['cid' => 1, 'form_key' => 'text'],
           2 => ['cid' => 2, 'form_key' => 'number'],
@@ -43,6 +70,14 @@ class EventTest extends \DrupalUnitTestCase {
       'number' => 57,
       'uuid' => 'test-uuid',
       'date' => '2015-10-27T13:27:25+01:00',
+      'type' => 'form_submission',
+      'action' => [
+        'uuid' => 'test-node-uuid',
+        'title' => 'Test title',
+        'needs_confirmation' => FALSE,
+        'type' => 'node_type',
+        'type_title' => FALSE,
+      ],
     ], $e->toArray());
   }
 
@@ -69,16 +104,28 @@ class EventTest extends \DrupalUnitTestCase {
       ->getMock();
     $submission = (object) [
       'uuid' => 'test-submission-uuid',
-      'node' => (object) ['uuid' => 'test-node-uuid', 'title' => 'Test node'],
+      'node' => (object) [
+        'nid' => 1,
+        'uuid' => 'test-node-uuid',
+        'type' => 'node_type',
+        'title' => 'Test node',
+        'webform' => ['components' => []],
+      ],
+      'data' => [],
     ];
-    $payment->contextObj->method('getSubmission')->willReturn($submission);
+    $submission_obj = new SubmissionStub($submission->node, $submission, []);
+    $payment->contextObj->method('getSubmission')->willReturn($submission_obj);
 
     $e = Event::fromPayment($payment);
     $this->assertEquals([
       'uuid' => 'test-submission-uuid',
+      'type' => 'payment_success',
       'action' => [
         'uuid' => 'test-node-uuid',
         'title' => 'Test node',
+        'type' => 'node_type',
+        'type_title' => FALSE,
+        'needs_confirmation' => FALSE,
       ],
       'pid' => 1,
       'currency_code' => 'EUR',

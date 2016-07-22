@@ -109,6 +109,9 @@ function campaignion_logcrm_post_event($event, $signature) {
  */
 function campaignion_logcrm_webform_submission_insert($node, $submission) {
   // Send submission event.
+  if ($submission->is_draft) {
+    return FALSE;
+  }
   $e = Event::fromSubmission(new Submission($node, $submission));
   QueueItem::byData([
     'type' => 'webform_submission',
@@ -122,6 +125,17 @@ function campaignion_logcrm_webform_submission_insert($node, $submission) {
  */
 function campaignion_logcrm_webform_submission_update($node, $submission) {
   campaignion_logcrm_webform_submission_insert($node, $submission);
+}
+
+/**
+ * Implements hook_webform_confirm_email_email_confirmed().
+ */
+function campaignion_logcrm_webform_confirm_email_email_confirmed($node, $submission) {
+  QueueItem::byData([
+    'type' => 'webform_submission_confirmed',
+    'id' => $submission->sid,
+    'event' => Event::fromSubmissionConfirmation($submission),
+  ]);
 }
 
 /**
