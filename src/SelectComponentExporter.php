@@ -9,20 +9,34 @@ class SelectComponentExporter {
 
   public function value($component, $values) {
     $options = _webform_select_options($component);
-    $values = [];
+
+    // Create a associative array with all selected values and their labels.
+    $new_values = [];
     foreach ($values as $value) {
+      if (is_null($value)) {
+        // Remove NULL values -> bug in little_helpers.
+        continue;
+      }
       if (isset($options[$value])) {
-        $values[$value] = $options[$value];
+        $new_values[$value] = $options[$value];
       }
       else {
-        // Select or other
-        $values[$value] = $value;
+        if (!$component['extra']['multiple'] && $value === '') {
+          // Radio without value so don't pass any.
+        }
+        else {
+          // Select or other
+          $new_values[$value] = $value;
+        }
       }
     }
+
     $single_value = (count($options) <= 1 && !$component['extra']['other_option']) || !$component['extra']['multiple'];
     if ($single_value) {
-      $value = $values ? array_shift($values) : FALSE;
+      return $new_values ? array_shift($new_values) : FALSE;
     }
-    return $value;
+    else {
+      return $new_values;
+    }
   }
 }
