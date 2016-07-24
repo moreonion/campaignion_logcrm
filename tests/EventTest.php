@@ -5,18 +5,18 @@ namespace Drupal\campaignion_logcrm;
 use \Drupal\little_helpers\Webform\Submission;
 
 class SubmissionStub extends Submission {
-  protected $data;
+  public $data;
   public function __construct($node, $submission, $data) {
     parent::__construct($node, $submission);
     $this->data = $data;
   }
-  public function valueByCid($cid) {
+  public function valuesByCid($cid) {
     return $this->data[$cid];
   }
 }
 
 class EventTest extends \DrupalUnitTestCase {
-  public function test_fromSubmissionConfirmation() {
+  public function setUp() {
     $s = (object) [
       'uuid' => 'test-uuid',
       'submitted' => 1445948845,
@@ -26,14 +26,17 @@ class EventTest extends \DrupalUnitTestCase {
         'title' => 'Test title',
         'type' => 'node_type',
         'webform' => ['components' => [
-          1 => ['cid' => 1, 'form_key' => 'text'],
-          2 => ['cid' => 2, 'form_key' => 'number'],
-          3 => ['cid' => 3, 'form_key' => 'nothing'],
+          1 => ['cid' => 1, 'type' => 'text', 'form_key' => 'text'],
+          2 => ['cid' => 2, 'type' => 'number', 'form_key' => 'number'],
+          3 => ['cid' => 3, 'type' => 'hidden', 'form_key' => 'nothing'],
         ]],
       ],
     ];
-    $submission = new SubmissionStub($s->node, $s, []);
-    $d = Event::fromSubmissionConfirmation($submission)->toArray();
+    $this->submission = new SubmissionStub($s->node, $s, []);
+  }
+
+  public function test_fromSubmissionConfirmation() {
+    $d = Event::fromSubmissionConfirmation($this->submission)->toArray();
     unset($d['date']);
     $this->assertEquals([
       'type' => 'form_submission_confirmed',
@@ -42,27 +45,13 @@ class EventTest extends \DrupalUnitTestCase {
   }
 
   public function test_fromSubmission() {
-    $s = (object) [
-      'uuid' => 'test-uuid',
-      'submitted' => 1445948845,
-      'node' => (object) [
-        'nid' => 1,
-        'uuid' => 'test-node-uuid',
-        'title' => 'Test title',
-        'type' => 'node_type',
-        'webform' => ['components' => [
-          1 => ['cid' => 1, 'form_key' => 'text'],
-          2 => ['cid' => 2, 'form_key' => 'number'],
-          3 => ['cid' => 3, 'form_key' => 'nothing'],
-        ]],
-      ],
+    $submission = $this->submission;
+    node_type_get_name($submission->node);
+    $submission->data = [
+      1 => ['TestText'],
+      2 => [57],
+      3 => [NULL],
     ];
-    $data = [
-      1 => 'TestText',
-      2 => 57,
-      3 => NULL,
-    ];
-    $submission = new SubmissionStub($s->node, $s, $data);
 
     $e = Event::fromSubmission($submission);
     $this->assertEquals([
@@ -102,27 +91,15 @@ class EventTest extends \DrupalUnitTestCase {
     $payment->contextObj = $this->getMockBuilder('\Drupal\webform_paymethod_select\WebformPaymentContext')
       ->disableOriginalConstructor()
       ->getMock();
-    $submission = (object) [
-      'uuid' => 'test-submission-uuid',
-      'node' => (object) [
-        'nid' => 1,
-        'uuid' => 'test-node-uuid',
-        'type' => 'node_type',
-        'title' => 'Test node',
-        'webform' => ['components' => []],
-      ],
-      'data' => [],
-    ];
-    $submission_obj = new SubmissionStub($submission->node, $submission, []);
-    $payment->contextObj->method('getSubmission')->willReturn($submission_obj);
+    $payment->contextObj->method('getSubmission')->willReturn($this->submission);
 
     $e = Event::fromPayment($payment);
     $this->assertEquals([
-      'uuid' => 'test-submission-uuid',
+      'uuid' => 'test-uuid',
       'type' => 'payment_success',
       'action' => [
         'uuid' => 'test-node-uuid',
-        'title' => 'Test node',
+        'title' => 'Test title',
         'type' => 'node_type',
         'type_title' => FALSE,
         'needs_confirmation' => FALSE,

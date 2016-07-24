@@ -9,25 +9,8 @@ class Event {
   protected $date;
   protected $data;
 
-  public static function actionData(Submission $submission) {
-    return [
-      'uuid' => $submission->node->uuid,
-      'title' => $submission->node->title,
-      'needs_confirmation' => $submission->webform->needsConfirmation(),
-      'type' => $submission->node->type,
-      'type_title' => node_type_get_name($submission->node),
-    ];
-  }
-
   public static function fromSubmission(Submission $submission, $type = 'form_submission') {
-    $data = [];
-    foreach ($submission->node->webform['components'] as $cid => $component) {
-      if ($value = $submission->valueByCid($cid)) {
-        $data[$component['form_key']] = $submission->valueByCid($cid);
-      }
-      $data['action'] = static::actionData($submission);
-    }
-    $data['uuid'] = $submission->uuid;
+    $data = Loader::instance()->submissionExporter()->data($submission);
     return new static($type, $submission->submitted, $data);
   }
 
@@ -40,7 +23,7 @@ class Event {
   public static function fromPayment(\Payment $payment, $type = 'payment_success') {
     $submission_obj = $payment->contextObj->getSubmission();
     $data['uuid'] = $submission_obj->uuid;
-    $data['action'] = static::actionData($submission_obj);
+    $data['action'] = Loader::instance()->submissionExporter()->actionData($submission_obj);
     $data['pid'] = $payment->pid;
     $status = $payment->getStatus();
     $data['currency_code'] = $payment->currency_code;
