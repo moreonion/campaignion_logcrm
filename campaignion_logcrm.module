@@ -19,7 +19,7 @@ function campaignion_logcrm_cronapi($op, $job = NULL) {
     'rule' => '*/2 * * * *',
     'weight' => 100,
     'file' => 'cron.php',
-    'callback' => '\Drupal\campaignion_logcrm\send_queue',
+    'callback' => '\\Drupal\\campaignion_logcrm\\send_queue',
   );
   return $items;
 }
