@@ -46,8 +46,8 @@ class SelectComponentExporterTest extends \DrupalUnitTestCase {
     $this->e = new SelectComponentExporter();
   }
 
-  public function test_radio_withValue_returnsLabel() {
-    $this->assertEqual('o1', $this->e->value($this->radio, ['1']));
+  public function test_radio_withValue_returnsArray() {
+    $this->assertEqual(['1' => 'o1'], $this->e->value($this->radio, ['1']));
   }
 
   public function test_radio_noValue_returnsFalse() {

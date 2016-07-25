@@ -31,9 +31,14 @@ class SelectComponentExporter {
       }
     }
 
-    $single_value = (count($options) <= 1 && !$component['extra']['other_option']) || !$component['extra']['multiple'];
+    // Allow checkboxes to have just their label as value.
+    $single_value = count($options) <= 1 && !$component['extra']['other_option'] && $component['extra']['multiple'];
     if ($single_value) {
       return $new_values ? array_shift($new_values) : FALSE;
+    }
+    // Radio without selection
+    elseif (!$component['extra']['multiple'] && !$new_values) {
+      return FALSE;
     }
     else {
       return $new_values;
