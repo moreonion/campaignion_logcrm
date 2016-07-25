@@ -7,11 +7,20 @@ class Loader {
   protected $componentCache = [];
   protected $submissionExporter = NULL;
 
+  protected $map = [];
+
   public static function instance() {
     if (!static::$instance) {
       static::$instance = new static();
     }
     return static::$instance;
+  }
+
+  public function __construct() {
+    $this->map = [
+      'newsletter' => '\\Drupal\\campaignion_logcrm\\NewsletterComponentExporter',
+      'select' => '\\Drupal\\campaignion_logcrm\\SelectComponentExporter',
+    ];
   }
 
   public function submissionExporter() {
@@ -25,13 +34,12 @@ class Loader {
     if (isset($this->componentCache[$type])) {
       return $this->componentCache[$type];
     }
-    switch ($type) {
-      case 'select':
-        $e = new SelectComponentExporter();
-        break;
-      default:
-        $e = new DefaultComponentExporter();
-        break;
+    if (isset($this->map[$type])) {
+      $class = $this->map[$type];
+      $e = new $class();
+    }
+    else {
+      $e = new DefaultComponentExporter();
     }
     $this->componentCache[$type] = $e;
     return $e;
