@@ -22,7 +22,7 @@ class SubmissionExporter {
       if($campaign = node_load($items[0]['nid'])) {
         $data += [
           'campaign_uuid' => $campaign->uuid,
-          'campaign_tite' => $campaign->title,
+          'campaign_title' => $campaign->title,
         ];
       }
     }
