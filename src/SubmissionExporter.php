@@ -10,13 +10,23 @@ class SubmissionExporter {
   }
 
   public function actionData($submission) {
-    return [
-      'uuid' => $submission->node->uuid,
-      'title' => $submission->node->title,
+    $node = $submission->node;
+    $data = [
+      'uuid' => $node->uuid,
+      'title' => $node->title,
       'needs_confirmation' => $submission->webform->needsConfirmation(),
-      'type' => $submission->node->type,
-      'type_title' => \node_type_get_name($submission->node),
+      'type' => $node->type,
+      'type_title' => \node_type_get_name($node),
     ];
+    if ($items = field_get_items('node', $node, 'field_reference_to_campaign')) {
+      if($campaign = node_load($items[0]['nid'])) {
+        $data += [
+          'campaign_uuid' => $campaign->uuid,
+          'campaign_tite' => $campaign->title,
+        ];
+      }
+    }
+    return $data;
   }
 
   public function data($submission) {
