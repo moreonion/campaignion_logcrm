@@ -34,6 +34,7 @@ class Event {
     $data['controller'] = $payment->method->controller->name;
     // Let other modules alter the data.
     drupal_alter('campaignion_logrcm_payment_event_data', $data, $payment);
+    drupal_alter('campaignion_logcrm_payment_event_data', $data, $payment);
     return new static($type, $status->created, $data);
   }
 

@@ -10,6 +10,8 @@ use \Drupal\campaignion_logcrm\Client;
 use \Drupal\campaignion_logcrm\Event;
 use \Drupal\campaignion_logcrm\QueueItem;
 
+require_once 'campaignion_logcrm.integrations.php';
+
 /**
  * Implements hook_cronapi().
  */
