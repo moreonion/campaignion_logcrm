@@ -33,7 +33,8 @@ function paypal_payment_campaignion_logcrm_payment_event_data_alter(array &$data
   $controller = $payment->method->controller;
   if ($controller instanceof PaypalECController || $controller instanceof PayPalPPSController) {
     $status = $payment->getStatus();
-    if ($ipn = PayPalIPNController::load($status->psiid)) {
+    $ipn = isset($status->ipn) ? $status->ipn : PayPalIPNController::load($status->psiid);
+    if ($ipn) {
       $data['transaction_id'] = $ipn->txn_id;
     }
   }
