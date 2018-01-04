@@ -111,9 +111,6 @@ function campaignion_logcrm_post_event($event, $signature) {
  */
 function campaignion_logcrm_webform_submission_insert($node, $submission) {
   // Send submission event.
-  if ($submission->is_draft) {
-    return;
-  }
   $e = Event::fromSubmission(new Submission($node, $submission));
   QueueItem::byData([
     'type' => 'webform_submission',
