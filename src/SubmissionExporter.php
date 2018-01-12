@@ -40,6 +40,7 @@ class SubmissionExporter {
     }
     $data['action'] = $this->actionData($submission);
     $data['uuid'] = $submission->uuid;
+    $data['is_draft'] = (bool) $submission->is_draft;
     return $data;
   }
 }
