@@ -18,6 +18,7 @@ class SubmissionStub extends Submission {
 class EventTest extends \DrupalUnitTestCase {
   public function setUp() {
     $s = (object) [
+      'is_draft' => 0,
       'uuid' => 'test-uuid',
       'submitted' => 1445948845,
       'node' => (object) [
@@ -57,11 +58,13 @@ class EventTest extends \DrupalUnitTestCase {
     ];
 
     $e = Event::fromSubmission($submission);
+    $a = $e->toArray();
+    unset($a['date']);
     $this->assertEquals([
+      'is_draft' => FALSE,
       'text' => 'TestText',
       'number' => 57,
       'uuid' => 'test-uuid',
-      'date' => '2015-10-27T13:27:25+01:00',
       'type' => 'form_submission',
       'action' => [
         'uuid' => 'test-node-uuid',
@@ -73,7 +76,7 @@ class EventTest extends \DrupalUnitTestCase {
       'tracking' => (object) [
         'tags' => [],
       ],
-    ], $e->toArray());
+    ], $a);
   }
 
   public function test_fromPayment() {
@@ -100,6 +103,8 @@ class EventTest extends \DrupalUnitTestCase {
     $payment->contextObj->method('getSubmission')->willReturn($this->submission);
 
     $e = Event::fromPayment($payment);
+    $a = $e->toArray();
+    unset($a['date']);
     $this->assertEquals([
       'uuid' => 'test-uuid',
       'type' => 'payment_success',
@@ -117,7 +122,6 @@ class EventTest extends \DrupalUnitTestCase {
       'method_specific' => 'test specific',
       'method_generic' => 'test generic',
       'controller' => 'test controller',
-      'date' => '2015-10-27T13:27:25+01:00',
-    ], $e->toArray());
+    ], $a);
   }
 }
