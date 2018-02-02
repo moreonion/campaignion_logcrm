@@ -2,6 +2,8 @@
 
 namespace Drupal\campaignion_logcrm;
 
+use Drupal\little_helpers\Webform\Submission;
+
 class SubmissionExporter {
   protected $loader;
 
@@ -29,7 +31,16 @@ class SubmissionExporter {
     return $data;
   }
 
-  public function data($submission) {
+  /**
+   * Get exportable data for a submission.
+   *
+   * @param \Drupal\little_helpers\Webform\Submission $submission
+   *   Submission that should be exported.
+   *
+   * @return mixed
+   *   JSON serializable data representing the submission.
+   */
+  public function data(Submission $submission) {
     $data = [];
     foreach ($submission->node->webform['components'] as $cid => $component) {
       $values = $submission->valuesByCid($cid);
@@ -41,6 +52,10 @@ class SubmissionExporter {
     $data['action'] = $this->actionData($submission);
     $data['uuid'] = $submission->uuid;
     $data['is_draft'] = (bool) $submission->is_draft;
+    if ($submission->tracking) {
+      $data['tracking'] = $submission->tracking;
+    }
     return $data;
   }
+
 }

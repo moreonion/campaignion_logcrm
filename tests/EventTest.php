@@ -31,6 +31,9 @@ class EventTest extends \DrupalUnitTestCase {
           3 => ['cid' => 3, 'type' => 'hidden', 'form_key' => 'nothing'],
         ]],
       ],
+      'tracking' => (object) [
+        'tags' => [],
+      ],
     ];
     $this->submission = new SubmissionStub($s->node, $s, []);
   }
@@ -66,6 +69,9 @@ class EventTest extends \DrupalUnitTestCase {
         'needs_confirmation' => FALSE,
         'type' => 'node_type',
         'type_title' => FALSE,
+      ],
+      'tracking' => (object) [
+        'tags' => [],
       ],
     ], $e->toArray());
   }
