@@ -2,7 +2,7 @@
 
 namespace Drupal\campaignion_logcrm;
 
-class SelectComponentExporterTest extends \DrupalUnitTestCase {
+class SelectComponentExporterTest extends \DrupalWebTestCase {
   protected $radio = [
     'type' => 'select',
     'form_key' => 'radio',
@@ -42,8 +42,27 @@ class SelectComponentExporterTest extends \DrupalUnitTestCase {
     ],
   ];
 
+  /**
+   * Create test node and component exporter.
+   */
   public function setUp() {
+    $this->node = (object) [
+      'type' => 'webform',
+      'title' => 'Select component exporter test',
+    ];
+    node_save($this->node);
+    $this->radio += ['nid' => $this->node->nid];
+    $this->checkbox += ['nid' => $this->node->nid];
+    $this->checkboxSingle += ['nid' => $this->node->nid];
+    $this->checkboxPrebuilt += ['nid' => $this->node->nid];
     $this->e = new SelectComponentExporter();
+  }
+
+  /**
+   * Delete the test node.
+   */
+  public function tearDown() {
+    node_delete($this->node->nid);
   }
 
   public function test_radio_withValue_returnsArray() {
