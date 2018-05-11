@@ -28,19 +28,19 @@ class NewsletterComponentExporterTest extends \DrupalUnitTestCase {
   }
 
   public function test_radio_yes_returnsLabel() {
-    $this->assertEqual('Yes', $this->e->value($this->radio, ['subscribed' => 'subscribed']));
+    $this->assertEqual('Yes', $this->e->value($this->radio, ['radios:opt-in']));
   }
 
   public function test_radio_no_returnsFalse() {
-    $this->assertEqual(FALSE ,$this->e->value($this->radio, ['subscribed' => 0]));
+    $this->assertEqual(FALSE ,$this->e->value($this->radio, ['radios:no-change']));
   }
 
   public function test_checkbox_yes_returnsLabel() {
-    $this->assertEqual('Yes', $this->e->value($this->checkbox, ['subscribed' => 'subscribed']));
+    $this->assertEqual('Yes', $this->e->value($this->checkbox, ['checkbox:opt-in']));
   }
 
   public function test_checkbox_no_returnsFalse() {
-    $this->assertEqual(FALSE, $this->e->value($this->checkbox, ['subscribed' => 0]));
+    $this->assertEqual(FALSE, $this->e->value($this->checkbox, ['checkbox:no-change']));
   }
 
 }

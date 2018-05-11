@@ -2,23 +2,18 @@
 
 namespace Drupal\campaignion_logcrm;
 
+use Drupal\campaignion_newsletters\ValuePrefix;
+
 class NewsletterComponentExporter {
+
   public function value($component, $values) {
+    $opt_in = ValuePrefix::remove($values) == 'opt-in';
     if ($component['extra']['display'] == 'radios') {
-      if (reset($values)) {
-        return $component['extra']['radio_labels'][1];
-      }
-      else {
-        return FALSE;
-      }
+      return $opt_in ? $component['extra']['radio_labels'][1] : FALSE;
     }
     else {
-      if (reset($values)) {
-        return $component['extra']['checkbox_label'];
-      }
-      else {
-        return FALSE;
-      }
+      return $opt_in ? $component['extra']['checkbox_label'] : FALSE;
     }
   }
+
 }
