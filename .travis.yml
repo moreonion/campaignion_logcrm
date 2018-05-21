@@ -28,7 +28,7 @@ before_script:
   - ln -s $repo test-root/sites/all/modules/campaignion_logcrm
   - cd test-root
   - root=`pwd`
-  - drush dl campaignion libraries ultimate_cron webform_paymethod_select webform_submission_uuid xautoload
+  - drush dl campaignion-7.x-1.15 libraries ultimate_cron webform_paymethod_select webform_submission_uuid xautoload
   - drush --yes pm-enable campaignion_logcrm campaignion_newsletters
 
 script:
