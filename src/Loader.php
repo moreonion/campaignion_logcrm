@@ -18,7 +18,6 @@ class Loader {
 
   public function __construct() {
     $this->map = [
-      'newsletter' => '\\Drupal\\campaignion_logcrm\\NewsletterComponentExporter',
       'select' => '\\Drupal\\campaignion_logcrm\\SelectComponentExporter',
     ];
   }
