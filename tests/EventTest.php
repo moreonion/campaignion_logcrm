@@ -2,20 +2,16 @@
 
 namespace Drupal\campaignion_logcrm;
 
-use \Drupal\little_helpers\Webform\Submission;
+use Drupal\little_helpers\Webform\Submission;
 
-class SubmissionStub extends Submission {
-  public $data;
-  public function __construct($node, $submission, $data) {
-    parent::__construct($node, $submission);
-    $this->data = $data;
-  }
-  public function valuesByCid($cid) {
-    return $this->data[$cid];
-  }
-}
-
+/**
+ * Test creating and dumping events.
+ */
 class EventTest extends \DrupalUnitTestCase {
+
+  /**
+   * Create a test submission.
+   */
   public function setUp() {
     parent::setUp();
     $s = (object) [
@@ -28,20 +24,24 @@ class EventTest extends \DrupalUnitTestCase {
         'uuid' => 'test-node-uuid',
         'title' => 'Test title',
         'type' => 'node_type',
-        'webform' => ['components' => [
-          1 => ['cid' => 1, 'type' => 'text', 'form_key' => 'text'],
-          2 => ['cid' => 2, 'type' => 'number', 'form_key' => 'number'],
-          3 => ['cid' => 3, 'type' => 'hidden', 'form_key' => 'nothing'],
-        ]],
+        'webform' => [],
       ],
       'tracking' => (object) [
         'tags' => [],
       ],
     ];
-    $this->submission = new SubmissionStub($s->node, $s, []);
+    $s->node->webform['components'] = [
+      1 => ['cid' => 1, 'type' => 'text', 'form_key' => 'text'],
+      2 => ['cid' => 2, 'type' => 'number', 'form_key' => 'number'],
+      3 => ['cid' => 3, 'type' => 'hidden', 'form_key' => 'nothing'],
+    ];
+    $this->submission = new Submission($s->node, $s, []);
   }
 
-  public function test_fromSubmissionConfirmation() {
+  /**
+   * Test creating a submission confirmation event.
+   */
+  public function testFromSubmissionConfirmation() {
     $d = Event::fromSubmissionConfirmation($this->submission)->toArray();
     unset($d['date']);
     $this->assertEquals([
@@ -50,7 +50,10 @@ class EventTest extends \DrupalUnitTestCase {
     ], $d);
   }
 
-  public function test_fromSubmission() {
+  /**
+   * Test creating a submission event.
+   */
+  public function testFromSubmission() {
     $submission = $this->submission;
     node_type_get_name($submission->node);
     $submission->data = [
@@ -87,18 +90,19 @@ class EventTest extends \DrupalUnitTestCase {
     ], $a);
   }
 
-  public function test_fromPayment() {
+  /**
+   * Test creating a payment event.
+   */
+  public function testFromPayment() {
     $method = (object) [
       'controller' => (object) ['name' => 'test controller'],
       'title_specific' => 'test specific',
       'title_generic' => 'test generic',
     ];
     $payment = $this->getMockBuilder('\Payment')
-      ->setConstructorArgs([[
-        'pid' => 1,
-        'currency_code' => 'EUR',
-        'method' => $method,
-      ]])->getMock();
+      ->setConstructorArgs([
+        ['pid' => 1, 'currency_code' => 'EUR', 'method' => $method],
+      ])->getMock();
     $status = (object) [
       'created' => 1445948845,
       'status' => 'test success',
@@ -132,4 +136,5 @@ class EventTest extends \DrupalUnitTestCase {
       'controller' => 'test controller',
     ], $a);
   }
+
 }
