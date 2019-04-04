@@ -17,7 +17,7 @@ function webform_paymethod_select_campaignion_logcrm_event_data_alter(array &$da
       webform_paymethod_select_webform_submission_load($submissions);
     }
 
-    foreach ($submission->payments as $cid => $payment) {
+    foreach (array_filter($submission->payments) as $cid => $payment) {
       $payment_data['pid'] = $payment->pid;
       $status = $payment->getStatus();
       $payment_data['currency_code'] = $payment->currency_code;

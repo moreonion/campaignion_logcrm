@@ -40,6 +40,10 @@ class FormSubmissionPaymentTest extends DrupalUnitTestCase {
         'selected_payment_methods' => [$method->pmid => $method->pmid],
       ],
     ];
+    $node->webform['components'][2] = [
+      'cid' => 2,
+      'form_key' => 'paymethod_select2',
+    ] + $node->webform['components'][1];
     node_save($node);
     $this->node = $node;
   }
@@ -64,7 +68,7 @@ class FormSubmissionPaymentTest extends DrupalUnitTestCase {
       'submitted' => 3,
       'uuid' => 'test-submission-uuid',
       'is_draft' => FALSE,
-      'data' => [1 => [$this->payment->pid]],
+      'data' => [1 => [$this->payment->pid], 2 => []],
     ]);
     $e = Event::fromSubmission($submission);
     $a = $e->toArray();
