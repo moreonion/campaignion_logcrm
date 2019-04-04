@@ -4,38 +4,60 @@ namespace Drupal\campaignion_logcrm;
 
 use Drupal\little_helpers\Webform\Submission;
 
+require_once drupal_get_path('module', 'webform') . '/includes/webform.components.inc';
+
 /**
  * Test creating and dumping events.
  */
 class EventTest extends \DrupalUnitTestCase {
 
   /**
-   * Create a test submission.
+   * Create test node and submission.
    */
   public function setUp() {
     parent::setUp();
+
+    $node = (object) [
+      'type' => 'webform',
+      'title' => 'Form submission test',
+    ];
+    node_object_prepare($node);
+    $node->webform['components'] = [
+      1 => ['type' => 'text', 'form_key' => 'text'],
+      2 => ['type' => 'number', 'form_key' => 'number'],
+      3 => ['type' => 'hidden', 'form_key' => 'nothing'],
+    ];
+    foreach ($node->webform['components'] as $cid => &$component) {
+      webform_component_defaults($component);
+      $component += [
+        'pid' => 0,
+        'cid' => $cid,
+        'name' => $component['form_key'],
+        'weight' => 0,
+      ];
+    }
+    node_save($node);
+    $this->node = $node;
+
     $s = (object) [
+      'nid' => $node->nid,
       'sid' => 12,
       'is_draft' => 0,
       'uuid' => 'test-uuid',
       'submitted' => 1445948845,
-      'node' => (object) [
-        'nid' => 1,
-        'uuid' => 'test-node-uuid',
-        'title' => 'Test title',
-        'type' => 'node_type',
-        'webform' => [],
-      ],
       'tracking' => (object) [
         'tags' => [],
       ],
     ];
-    $s->node->webform['components'] = [
-      1 => ['cid' => 1, 'type' => 'text', 'form_key' => 'text'],
-      2 => ['cid' => 2, 'type' => 'number', 'form_key' => 'number'],
-      3 => ['cid' => 3, 'type' => 'hidden', 'form_key' => 'nothing'],
-    ];
-    $this->submission = new Submission($s->node, $s, []);
+    $this->submission = new Submission($node, $s);
+  }
+
+  /**
+   * Delete test node and payment.
+   */
+  public function tearDown() {
+    node_delete($this->node->nid);
+    parent::tearDown();
   }
 
   /**
@@ -55,7 +77,6 @@ class EventTest extends \DrupalUnitTestCase {
    */
   public function testFromSubmission() {
     $submission = $this->submission;
-    node_type_get_name($submission->node);
     $submission->data = [
       1 => ['TestText'],
       2 => [57],
@@ -74,11 +95,11 @@ class EventTest extends \DrupalUnitTestCase {
       'uuid' => 'test-uuid',
       'type' => 'form_submission',
       'action' => [
-        'uuid' => 'test-node-uuid',
-        'title' => 'Test title',
+        'uuid' => $this->node->uuid,
+        'title' => $this->node->title,
         'needs_confirmation' => FALSE,
-        'type' => 'node_type',
-        'type_title' => FALSE,
+        'type' => 'webform',
+        'type_title' => 'Webform',
       ],
       'tracking' => (object) [
         'tags' => [],
@@ -121,11 +142,11 @@ class EventTest extends \DrupalUnitTestCase {
       'uuid' => 'test-uuid',
       'type' => 'payment_success',
       'action' => [
-        'uuid' => 'test-node-uuid',
-        'title' => 'Test title',
-        'type' => 'node_type',
-        'type_title' => FALSE,
+        'uuid' => $this->node->uuid,
+        'title' => $this->node->title,
         'needs_confirmation' => FALSE,
+        'type' => 'webform',
+        'type_title' => 'Webform',
       ],
       'pid' => 1,
       'currency_code' => 'EUR',

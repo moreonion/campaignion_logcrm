@@ -16,6 +16,9 @@ if (module_exists('manual_direct_debit_uk')) {
 if (module_exists('paypal_payment')) {
   require_once 'integrations/paypal_payment.inc';
 }
+if (module_exists('webform_paymethod_select')) {
+  require_once 'integrations/webform_paymethod_select.inc';
+}
 
 /**
  * Implements hook_cronapi().
