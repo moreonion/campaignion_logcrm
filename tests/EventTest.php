@@ -17,6 +17,7 @@ class SubmissionStub extends Submission {
 
 class EventTest extends \DrupalUnitTestCase {
   public function setUp() {
+    parent::setUp();
     $s = (object) [
       'is_draft' => 0,
       'uuid' => 'test-uuid',
