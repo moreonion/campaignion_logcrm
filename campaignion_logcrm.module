@@ -10,7 +10,12 @@ use \Drupal\campaignion_logcrm\Client;
 use \Drupal\campaignion_logcrm\Event;
 use \Drupal\campaignion_logcrm\QueueItem;
 
-require_once 'campaignion_logcrm.integrations.php';
+if (module_exists('manual_direct_debit_uk')) {
+  require_once 'integrations/manual_direct_debit_uk.inc';
+}
+if (module_exists('paypal_payment')) {
+  require_once 'integrations/paypal_payment.inc';
+}
 
 /**
  * Implements hook_cronapi().
