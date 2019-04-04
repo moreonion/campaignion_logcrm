@@ -19,6 +19,7 @@ class EventTest extends \DrupalUnitTestCase {
   public function setUp() {
     parent::setUp();
     $s = (object) [
+      'sid' => 12,
       'is_draft' => 0,
       'uuid' => 'test-uuid',
       'submitted' => 1445948845,
@@ -61,6 +62,8 @@ class EventTest extends \DrupalUnitTestCase {
     $e = Event::fromSubmission($submission);
     $a = $e->toArray();
     unset($a['date']);
+    $nid = $submission->node->nid;
+    $link_options = ['absolute' => TRUE, 'alias' => TRUE];
     $this->assertEquals([
       'is_draft' => FALSE,
       'text' => 'TestText',
@@ -76,6 +79,10 @@ class EventTest extends \DrupalUnitTestCase {
       ],
       'tracking' => (object) [
         'tags' => [],
+      ],
+      '_links' => [
+        'action' => url("node/$nid", $link_options),
+        'submission' => url("node/$nid/submission/{$submission->sid}", $link_options),
       ],
     ], $a);
   }
