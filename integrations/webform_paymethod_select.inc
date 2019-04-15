@@ -11,11 +11,13 @@
 function webform_paymethod_select_campaignion_logcrm_event_data_alter(array &$data, $type, array $context) {
   if ($type == 'form_submission') {
     $submission = $context['submission'];
-    if (!isset($submission->payments)) {
-      $submission->payments = [];
-      $submissions[$submission->sid] = $submission->unwrap();
-      webform_paymethod_select_webform_submission_load($submissions);
-    }
+
+    // Refresh payment objects. This seems to be necessary because the payment
+    // happens in the same request and webform_paymethod_select doesn’t update
+    // the data in place.
+    $submission->payments = [];
+    $submissions[$submission->sid] = $submission->unwrap();
+    webform_paymethod_select_webform_submission_load($submissions);
 
     foreach (array_filter($submission->payments) as $cid => $payment) {
       $payment_data['pid'] = $payment->pid;
