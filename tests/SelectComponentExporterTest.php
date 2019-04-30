@@ -46,6 +46,7 @@ class SelectComponentExporterTest extends \DrupalWebTestCase {
    * Create test node and component exporter.
    */
   public function setUp() {
+    parent::setUp();
     $this->node = (object) [
       'type' => 'webform',
       'title' => 'Select component exporter test',
@@ -63,6 +64,7 @@ class SelectComponentExporterTest extends \DrupalWebTestCase {
    */
   public function tearDown() {
     node_delete($this->node->nid);
+    parent::tearDown();
   }
 
   public function test_radio_withValue_returnsArray() {

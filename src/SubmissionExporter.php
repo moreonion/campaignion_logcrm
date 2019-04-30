@@ -4,13 +4,28 @@ namespace Drupal\campaignion_logcrm;
 
 use Drupal\little_helpers\Webform\Submission;
 
+/**
+ * Generator for logCRM event data from a webform submission.
+ */
 class SubmissionExporter {
   protected $loader;
 
+  /**
+   * Create a new exporter.
+   */
   public function __construct($loader) {
     $this->loader = $loader;
   }
 
+  /**
+   * Generate the action data.
+   *
+   * @param \Drupal\little_helpers\Webform\Submission $submission
+   *   Submission that should be exported.
+   *
+   * @return mixed
+   *   JSON serializable data representing the submission.
+   */
   public function actionData($submission) {
     $node = $submission->node;
     $data = [
@@ -21,7 +36,7 @@ class SubmissionExporter {
       'type_title' => \node_type_get_name($node),
     ];
     if ($items = field_get_items('node', $node, 'field_reference_to_campaign')) {
-      if($campaign = node_load($items[0]['nid'])) {
+      if ($campaign = node_load($items[0]['nid'])) {
         $data += [
           'campaign_uuid' => $campaign->uuid,
           'campaign_title' => $campaign->title,
@@ -55,6 +70,12 @@ class SubmissionExporter {
     if ($submission->tracking) {
       $data['tracking'] = $submission->tracking;
     }
+    $link_options = ['absolute' => TRUE, 'alias' => TRUE];
+    $nid = $submission->node->nid;
+    $data['_links'] = [
+      'action' => url("node/$nid", $link_options),
+      'submission' => url("node/$nid/submission/{$submission->sid}", $link_options),
+    ];
     return $data;
   }
 
