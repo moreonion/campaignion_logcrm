@@ -5,7 +5,7 @@ namespace Drupal\campaignion_logcrm\WebformComponent;
 /**
  * Exporter for select components.
  */
-class Select {
+class Select extends Verbatim {
 
   /**
    * Load all needed includes.
@@ -15,7 +15,7 @@ class Select {
   }
 
   /**
-   * Get the value for the component.
+   * Filter the component values.
    *
    * @param array $component
    *   The webform component configuration.
@@ -25,7 +25,7 @@ class Select {
    * @return mixed
    *   Output data for logCRM in an JSON encodable format.
    */
-  public function value(array $component, array $values) {
+  public function filter(array $component, array $values) {
     $options = _webform_select_options($component);
 
     // Create a associative array with all selected values and their labels.
