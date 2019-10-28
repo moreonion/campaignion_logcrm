@@ -9,6 +9,15 @@ use Drupal\little_helpers\Webform\Submission;
  */
 class Verbatim {
 
+  protected $loader;
+
+  /**
+   * Create a new instance.
+   */
+  public function __construct($loader) {
+    $this->loader = $loader;
+  }
+
   /**
    * Return the first value of the webform component (if any).
    */

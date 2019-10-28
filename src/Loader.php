@@ -56,10 +56,10 @@ class Loader {
     }
     if (isset($this->map[$type])) {
       $class = $this->map[$type];
-      $e = new $class();
+      $e = new $class($this);
     }
     else {
-      $e = new Verbatim();
+      $e = new Verbatim($this);
     }
     $this->componentCache[$type] = $e;
     return $e;
