@@ -1,8 +1,14 @@
 <?php
 
-namespace Drupal\campaignion_logcrm;
+namespace Drupal\campaignion_logcrm\WebformComponent;
 
-class SelectComponentExporterTest extends \DrupalWebTestCase {
+use Upal\DrupalUnitTestCase;
+
+/**
+ * Test the select component exporter.
+ */
+class SelectTest extends DrupalUnitTestCase {
+
   protected $radio = [
     'type' => 'select',
     'form_key' => 'radio',
@@ -56,7 +62,7 @@ class SelectComponentExporterTest extends \DrupalWebTestCase {
     $this->checkbox += ['nid' => $this->node->nid];
     $this->checkboxSingle += ['nid' => $this->node->nid];
     $this->checkboxPrebuilt += ['nid' => $this->node->nid];
-    $this->e = new SelectComponentExporter();
+    $this->e = new Select();
   }
 
   /**
