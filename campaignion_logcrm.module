@@ -141,8 +141,8 @@ function campaignion_logcrm_webform_confirm_email_email_confirmed($node, $submis
   QueueItem::byData([
     'type' => 'webform_submission_confirmed',
     'id' => $submission->sid,
-    'event' => Event::fromSubmissionConfirmation($submission),
-  ]);
+    'event' => Event::fromSubmissionConfirmation(new Submission($node, $submission)),
+  ])->save();
 }
 
 /**
