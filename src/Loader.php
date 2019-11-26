@@ -20,18 +20,33 @@ class Loader {
    */
   public static function instance() {
     if (!static::$instance) {
-      static::$instance = new static();
+      static::$instance = new static(static::getPluginInfo());
     }
     return static::$instance;
   }
 
   /**
+   * Invoke hooks to get the component exporter plugin info.
+   *
+   * @return array
+   *   Component exporter plugin info.
+   */
+  public static function getPluginInfo() {
+    $info = module_invoke_all('campaignion_logcrm_webform_component_exporter_info');
+    drupal_alter('campaignion_logcrm_webform_component_exporter_info', $info);
+    foreach ($info as &$plugin) {
+      if (is_string($plugin)) {
+        $plugin = ['class' => $plugin];
+      }
+    }
+    return $info;
+  }
+
+  /**
    * Create a new loader instance.
    */
-  public function __construct() {
-    $this->map = [
-      'select' => '\\Drupal\\campaignion_logcrm\\WebformComponent\\Select',
-    ];
+  public function __construct(array $plugin_info) {
+    $this->map = $plugin_info;
   }
 
   /**
@@ -55,11 +70,12 @@ class Loader {
       return $this->componentCache[$type];
     }
     if (isset($this->map[$type])) {
-      $class = $this->map[$type];
-      $e = new $class($this);
+      $info = $this->map[$type];
+      $class = $info['class'];
+      $e = $class::fromConfig($info, $this);
     }
     else {
-      $e = new Verbatim($this);
+      $e = Verbatim::fromConfig([], $this);
     }
     $this->componentCache[$type] = $e;
     return $e;

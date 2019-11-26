@@ -2,6 +2,7 @@
 
 namespace Drupal\campaignion_logcrm\WebformComponent;
 
+use Drupal\campaignion_logcrm\Loader;
 use Drupal\little_helpers\Webform\Submission;
 
 /**
@@ -9,13 +10,16 @@ use Drupal\little_helpers\Webform\Submission;
  */
 class Verbatim {
 
-  protected $loader;
-
   /**
-   * Create a new instance.
+   * Create new instance by passing the config.
+   *
+   * @param array $config
+   *   The plugin configuration.
+   * @param \Drupal\campaignion_logcrm\Loader $loader
+   *   The plugin loader.
    */
-  public function __construct($loader) {
-    $this->loader = $loader;
+  public static function fromConfig(array $config, Loader $loader) {
+    return new static();
   }
 
   /**
