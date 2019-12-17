@@ -162,3 +162,11 @@ function campaignion_logcrm_payment_status_change(Payment $payment, PaymentStatu
   ])->save();
 }
 
+/**
+ * Implements hook_campaignion_logcrm_webform_component_exporter_info().
+ */
+function campaignion_logcrm_campaignion_logcrm_webform_component_exporter_info() {
+  $ns = '\\Drupal\\campaignion_logcrm\\WebformComponent\\';
+  $info['select'] = $ns . 'Select';
+  return $info;
+}

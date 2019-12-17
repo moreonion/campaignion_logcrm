@@ -8,6 +8,35 @@
  */
 
 /**
+ * Register webform component exporter plugins.
+ *
+ * @return array
+ *   A map of webform component types to configuration arrays. Each item is
+ *   is either a class name of a plugin or an array. If it is an array it must
+ *   have the following keys:
+ *   - class: The class name of the plugin.
+ */
+function hook_campaignion_logcrm_webform_component_exporter_info() {
+  $info['custom'] = '\\Drupal\\custom_module\\Exporter';
+  return $info;
+}
+
+/**
+ * Alter the webform component exporter plugin info.
+ *
+ * @param array $info
+ *   The component plugin info.
+ *
+ * @see hook_campaignion_logcrm_webform_component_exporter_info()
+ */
+function hook_campaignion_logcrm_webform_component_exporter_info_alter(array &$info) {
+  $info['custom'] = [
+    'class' => '\\Drupal\\other_module\\Exporter',
+    'param1' => 'value',
+  ];
+}
+
+/**
  * Allow other modules to modify the event data.
  *
  * @param array $data

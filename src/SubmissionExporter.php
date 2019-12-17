@@ -58,9 +58,8 @@ class SubmissionExporter {
   public function data(Submission $submission) {
     $data = [];
     foreach ($submission->node->webform['components'] as $cid => $component) {
-      $values = $submission->valuesByCid($cid);
       $exporter = $this->loader->componentExporter($component['type']);
-      if ($value = $exporter->value($component, $values)) {
+      if ($value = $exporter->value($component, $submission)) {
         $data[$component['form_key']] = $value;
       }
     }
