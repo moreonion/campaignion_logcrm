@@ -12,7 +12,7 @@ class SubmissionIntegrationTest extends DrupalUnitTestCase {
   /**
    * Set up test node.
    */
-  public function setUp() {
+  public function setUp() : void {
     parent::setUp();
     require_once drupal_get_path('module', 'webform') . '/includes/webform.components.inc';
     require_once drupal_get_path('module', 'webform') . '/includes/webform.submissions.inc';
@@ -41,7 +41,7 @@ class SubmissionIntegrationTest extends DrupalUnitTestCase {
   /**
    * Delete test node and payment.
    */
-  public function tearDown() {
+  public function tearDown() : void {
     db_delete('campaignion_logcrm_queue')->execute();
     node_delete($this->node->nid);
     parent::tearDown();
