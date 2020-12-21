@@ -34,7 +34,8 @@ class PaymentExporterTest extends DrupalUnitTestCase {
     $this->assertEqual([
       'pid' => 42,
       'currency_code' => 'EUR',
-      'total_amount' => 7.0,
+      'total_amount' => 7 * 1.1,
+      'total_amount_subunits' => 770,
       'status' => 'payment_status_new',
       'method_specific' => 'Dummy method',
       'method_generic' => 'Test payment method',

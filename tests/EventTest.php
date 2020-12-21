@@ -156,16 +156,17 @@ class EventTest extends \DrupalUnitTestCase {
       'title_specific' => 'test specific',
       'title_generic' => 'test generic',
     ];
-    $payment = $this->getMockBuilder('\Payment')
-      ->setConstructorArgs([
-        ['pid' => 1, 'currency_code' => 'EUR', 'method' => $method],
-      ])->getMock();
-    $status = (object) [
-      'created' => 1445948845,
-      'status' => 'test success',
-    ];
-    $payment->method('getStatus')->willReturn($status);
-    $payment->method('totalAmount')->willReturn(42);
+    $payment = entity_create('payment', [
+      'pid' => 1,
+      'currency_code' => 'EUR',
+      'method' => $method,
+    ]);
+    $payment->setLineItem(new \PaymentLineItem([
+      'name' => 'foo',
+      'description' => 'Foo line item',
+      'amount' => 42,
+    ]));
+    $payment->setStatus(new \PaymentStatusItem('test success', 1445948845));
     $payment->contextObj = $this->getMockBuilder('\Drupal\webform_paymethod_select\WebformPaymentContext')
       ->disableOriginalConstructor()
       ->getMock();
@@ -186,7 +187,8 @@ class EventTest extends \DrupalUnitTestCase {
       ],
       'pid' => 1,
       'currency_code' => 'EUR',
-      'total_amount' => 42,
+      'total_amount' => 42.0,
+      'total_amount_subunits' => 4200,
       'status' => 'test success',
       'method_specific' => 'test specific',
       'method_generic' => 'test generic',
