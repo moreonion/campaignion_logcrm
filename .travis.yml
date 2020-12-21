@@ -1,27 +1,33 @@
 language: php
+os: linux
+dist: xenial
 services:
   - mysql
 php:
-  - 7.1
+  - 7.3
+
 mysql:
   database: drupal
   username: root
   encoding: utf8
 
+env:
+  COMPOSER_HOME=$HOME/.config/composer
+
 cache:
   directories:
-     - $HOME/.composer/cache
+     - $COMPOSER_HOME/cache
      - $HOME/.drush/cache
 
 install:
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - composer global require drush/drush:8.1.* torotil/upal:1.1.3 phpunit/phpunit:6.4.*
+  - export PATH="$COMPOSER_HOME/vendor/bin:$PATH"
+  - composer global require drush/drush:8.1.* phpunit/phpunit:^8 torotil/upal:2.0.0-RC1
 
 before_script:
   - repo=`pwd`
   - root=$HOME/test-root
   - mysql -e 'create database drupal'
-  - php -d include_path=`pwd` -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes core-quick-drupal --core=drupal-7.67 --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --root=$root
+  - php -d include_path=`pwd` -d sendmail_path=`which true` $COMPOSER_HOME/vendor/bin/drush.php --yes core-quick-drupal --core=drupal-7.69 --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --root=$root
   - ln -s $repo $root/sites/all/modules/module_under_test
   - cd $root
   - drush dl campaignion-7.x-1.15 libraries little_helpers-2.0-alpha5 ultimate_cron webform_paymethod_select webform_submission_uuid xautoload
@@ -29,7 +35,7 @@ before_script:
 
 script:
   - cd $repo
-  - UPAL_ROOT=$root UPAL_WEB_URL=http://127.0.0.1 phpunit --bootstrap=$HOME/.composer/vendor/torotil/upal/bootstrap.php --coverage-clover=coverage.xml .
+  - UPAL_ROOT=$root UPAL_WEB_URL=http://127.0.0.1 XDEBUG_MODE=coverage phpunit --bootstrap=$COMPOSER_HOME/vendor/torotil/upal/bootstrap.php --coverage-clover=coverage.xml .
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
