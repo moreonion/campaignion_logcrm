@@ -28,6 +28,17 @@ class PaymentExporter {
     $data['method_specific'] = $payment->method->title_specific;
     $data['method_generic'] = $payment->method->title_generic;
     $data['controller'] = $payment->method->controller->name;
+    $data['line_items'] = [];
+    foreach ($payment->line_items as $name => $line_item) {
+      $data['line_items'][$name] = [
+        'unit_amount_subunits' => (int) round($line_item->amount * $subunits),
+        'quantity' => $line_item->quantity,
+        'tax_rate' => $line_item->tax_rate,
+        'net_amount_subunits' => (int) round($line_item->totalAmount(FALSE) * $subunits),
+        'total_amount_subunits' => (int) round($line_item->totalAmount(TRUE) * $subunits),
+        'description' => format_string($line_item->description, $line_item->description_arguments),
+      ];
+    }
     return $data;
   }
 
