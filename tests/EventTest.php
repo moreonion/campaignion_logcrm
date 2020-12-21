@@ -193,6 +193,16 @@ class EventTest extends \DrupalUnitTestCase {
       'method_specific' => 'test specific',
       'method_generic' => 'test generic',
       'controller' => 'test controller',
+      'line_items' => [
+        'foo' => [
+          'unit_amount_subunits' => 4200,
+          'quantity' => 1.0,
+          'net_amount_subunits' => 4200,
+          'tax_rate' => 0.0,
+          'total_amount_subunits' => 4200,
+          'description' => 'Foo line item',
+        ],
+      ],
     ], $a);
   }
 
