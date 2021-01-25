@@ -11,7 +11,7 @@ class Event {
   protected $data;
 
   public static function fromSubmission(Submission $submission, $type = 'form_submission') {
-    $data = Loader::instance()->submissionExporter()->data($submission);
+    $data = Container::get()->loadService('campaignion_logcrm.submission_exporter')->data($submission);
     $context['submission'] = $submission;
     return static::fromData($type, $submission->submitted, $data, $context);
   }
@@ -43,7 +43,7 @@ class Event {
     $exporter = Container::get()->loadService('campaignion_logcrm.payment_exporter');
     $submission_obj = $payment->contextObj->getSubmission();
     $data['uuid'] = $submission_obj->uuid;
-    $data['action'] = Loader::instance()->submissionExporter()->actionData($submission_obj);
+    $data['action'] = Container::get()->loadService('campaignion_logcrm.submission_exporter')->actionData($submission_obj);
     $data += $exporter->toJson($payment);
 
     // Let other modules alter the data.
