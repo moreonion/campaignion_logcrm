@@ -75,6 +75,7 @@ class SubmissionExporter {
       'action' => url("node/$nid", $link_options),
       'submission' => url("node/$nid/submission/{$submission->sid}", $link_options),
     ];
+    $data['_optins'] = OptInExporter::fromConfig()->export($submission);
     return $data;
   }
 

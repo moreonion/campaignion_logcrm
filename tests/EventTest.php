@@ -26,6 +26,13 @@ class EventTest extends \DrupalUnitTestCase {
       1 => ['type' => 'text', 'form_key' => 'text'],
       2 => ['type' => 'number', 'form_key' => 'number'],
       3 => ['type' => 'hidden', 'form_key' => 'nothing'],
+      4 => [
+        'type' => 'opt_in',
+        'form_key' => 'email_opt_in',
+        'extra' => [
+          'channel' => 'email',
+        ],
+      ],
     ];
     foreach ($node->webform['components'] as $cid => &$component) {
       webform_component_defaults($component);
@@ -49,6 +56,8 @@ class EventTest extends \DrupalUnitTestCase {
         'tags' => [],
       ],
     ];
+    $submissions = [$s->sid => $s];
+    campaignion_opt_in_webform_submission_load($submissions);
     $this->submission = new Submission($node, $s);
   }
 
@@ -81,6 +90,7 @@ class EventTest extends \DrupalUnitTestCase {
       1 => ['TestText'],
       2 => [57],
       3 => [NULL],
+      4 => ['radios:opt-in'],
     ];
 
     $e = Event::fromSubmission($submission);
@@ -92,6 +102,7 @@ class EventTest extends \DrupalUnitTestCase {
       'is_draft' => FALSE,
       'text' => 'TestText',
       'number' => 57,
+      'email_opt_in' => 'radios:opt-in',
       'uuid' => 'test-uuid',
       'type' => 'form_submission',
       'action' => [
@@ -107,6 +118,18 @@ class EventTest extends \DrupalUnitTestCase {
       '_links' => [
         'action' => url("node/$nid", $link_options),
         'submission' => url("node/$nid/submission/{$submission->sid}", $link_options),
+      ],
+      '_optins' => [
+        4 => [
+          'value' => 'opt-in',
+          'raw_value' => 'radios:opt-in',
+          'channel' => 'email',
+          'statement' => '',
+          'unsubscribe_all' => TRUE,
+          'unsubscribe_unknown' => FALSE,
+          'lists' => [],
+          'ip_address' => '127.0.0.1',
+        ],
       ],
     ], $a);
   }
