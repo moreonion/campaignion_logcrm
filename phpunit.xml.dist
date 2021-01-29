@@ -1,6 +1,6 @@
 <phpunit backupGlobals="false"
-    backupStaticAttributes="false"
-    syntaxCheck="false">
+    backupStaticAttributes="false">
+
 <filter>
   <whitelist processUncoveredFilesFromWhitelist="true" addUncoveredFilesFromWhitelist="true">
     <directory suffix=".php">.</directory>
@@ -14,8 +14,11 @@
       <directory suffix=".features.inc">.</directory>
       <directory suffix=".features.field_base.inc">.</directory>
       <directory suffix=".features.field_instance.inc">.</directory>
+      <directory suffix=".features.filter.inc">.</directory>
       <directory suffix=".features.taxonomy.inc">.</directory>
       <directory suffix=".features.uuid_term.inc">.</directory>
+      <directory suffix=".field_group.inc">.</directory>
+      <directory suffix=".strongarm.inc">.</directory>
     </exclude>
   </whitelist>
 </filter>

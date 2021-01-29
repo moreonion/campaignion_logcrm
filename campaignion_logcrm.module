@@ -8,6 +8,7 @@ use \Drupal\webform_paymethod_select\WebformPaymentContext;
 
 use \Drupal\campaignion_logcrm\Client;
 use \Drupal\campaignion_logcrm\Event;
+use \Drupal\campaignion_logcrm\PaymentExporter;
 use \Drupal\campaignion_logcrm\QueueItem;
 
 if (module_exists('manual_direct_debit_uk')) {
@@ -68,6 +69,14 @@ function campaignion_logcrm_libraries_info() {
     },
   ];
   return $libraries;
+}
+
+/**
+ * Implements hook_little_helpers_serices().
+ */
+function campaignion_logcrm_little_helpers_services() {
+  $info['campaignion_logcrm.payment_exporter']['class'] = PaymentExporter::class;
+  return $info;
 }
 
 /**

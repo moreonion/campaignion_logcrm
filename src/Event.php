@@ -2,7 +2,8 @@
 
 namespace Drupal\campaignion_logcrm;
 
-use \Drupal\little_helpers\Webform\Submission;
+use Drupal\little_helpers\Services\Container;
+use Drupal\little_helpers\Webform\Submission;
 
 class Event {
   protected $type;
@@ -39,23 +40,17 @@ class Event {
   }
 
   public static function fromPayment(\Payment $payment, $type = 'payment_success') {
+    $exporter = Container::get()->loadService('campaignion_logcrm.payment_exporter');
     $submission_obj = $payment->contextObj->getSubmission();
     $data['uuid'] = $submission_obj->uuid;
     $data['action'] = Loader::instance()->submissionExporter()->actionData($submission_obj);
-    $data['pid'] = $payment->pid;
-    $status = $payment->getStatus();
-    $data['currency_code'] = $payment->currency_code;
-    $data['total_amount'] = $payment->totalAmount(TRUE);
-    $data['status'] = $status->status;
-    $data['method_specific'] = $payment->method->title_specific;
-    $data['method_generic'] = $payment->method->title_generic;
-    $data['controller'] = $payment->method->controller->name;
+    $data += $exporter->toJson($payment);
 
     // Let other modules alter the data.
     drupal_alter('campaignion_logcrm_payment_event_data', $data, $payment);
     $context['payment'] = $payment;
     $context['submission'] = $submission_obj;
-    return static::fromData($type, $status->created, $data, $context);
+    return static::fromData($type, $payment->getStatus()->created, $data, $context);
   }
 
   public function __construct($type, $date = NULL, $data = []) {

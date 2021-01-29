@@ -1,9 +1,10 @@
 name = Campaignion LogCRM
 description = Integration module for LogCRM: Send events to LogCRM and let it tag contacts.
 core = 7.x
-php = 5.4
+php = 7.3
 
 dependencies[] = libraries
+dependencies[] = little_helpers:little_helpers (>=2.0-alpha10)
 dependencies[] = ultimate_cron
 dependencies[] = webform_paymethod_select
 dependencies[] = webform_submission_uuid

@@ -13,7 +13,7 @@ class FormSubmissionPaymentTest extends DrupalUnitTestCase {
   /**
    * Create test node and payment.
    */
-  public function setUp() {
+  public function setUp() : void {
     parent::setUp();
 
     $controller = payment_method_controller_load(wps_test_method_payment_method_controller_info()[0]);
@@ -51,7 +51,7 @@ class FormSubmissionPaymentTest extends DrupalUnitTestCase {
   /**
    * Delete test node and payment.
    */
-  public function tearDown() {
+  public function tearDown() : void {
     node_delete($this->node->nid);
     entity_delete('payment_method', $this->payment->method->pmid);
     entity_delete('payment', $this->payment->pid);

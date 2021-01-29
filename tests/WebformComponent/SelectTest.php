@@ -51,7 +51,7 @@ class SelectTest extends DrupalUnitTestCase {
   /**
    * Create test node and component exporter.
    */
-  public function setUp() {
+  public function setUp() : void {
     parent::setUp();
     $this->node = (object) [
       'type' => 'webform',
@@ -68,7 +68,7 @@ class SelectTest extends DrupalUnitTestCase {
   /**
    * Delete the test node.
    */
-  public function tearDown() {
+  public function tearDown() : void {
     node_delete($this->node->nid);
     parent::tearDown();
   }

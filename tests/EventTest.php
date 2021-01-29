@@ -14,7 +14,7 @@ class EventTest extends \DrupalUnitTestCase {
   /**
    * Create test node and submission.
    */
-  public function setUp() {
+  public function setUp() : void {
     parent::setUp();
 
     $node = (object) [
@@ -55,7 +55,7 @@ class EventTest extends \DrupalUnitTestCase {
   /**
    * Delete test node and payment.
    */
-  public function tearDown() {
+  public function tearDown() : void {
     node_delete($this->node->nid);
     parent::tearDown();
   }
