@@ -3,13 +3,16 @@
 use \Drupal\campaignion\ContactTypeManager;
 use \Drupal\campaignion\NoEmailException;
 use \Drupal\campaignion\CRM\Import\Source\ArraySource;
+use \Drupal\little_helpers\Services\Container;
 use \Drupal\little_helpers\Webform\Submission;
 use \Drupal\webform_paymethod_select\WebformPaymentContext;
 
 use \Drupal\campaignion_logcrm\Client;
 use \Drupal\campaignion_logcrm\Event;
+use \Drupal\campaignion_logcrm\OptInExporter;
 use \Drupal\campaignion_logcrm\PaymentExporter;
 use \Drupal\campaignion_logcrm\QueueItem;
+use \Drupal\campaignion_logcrm\SubmissionExporter;
 
 if (module_exists('manual_direct_debit_uk')) {
   require_once 'integrations/manual_direct_debit_uk.inc';
@@ -75,7 +78,27 @@ function campaignion_logcrm_libraries_info() {
  * Implements hook_little_helpers_serices().
  */
 function campaignion_logcrm_little_helpers_services() {
+  $info['campaignion_logcrm.component_plugins'] = [
+    'class' => Container::class,
+    'arguments' => ['campaignion_logcrm.component_plugins'],
+    'calls' => [
+      ['loadSpecsFromHook', [
+        'campaignion_logcrm_webform_component_exporter_info',
+      ]],
+    ],
+  ];
+  $info['campaignion_logcrm.opt_in_exporter'] = [
+    'class' => OptInExporter::class,
+    'constructor' => 'fromConfig',
+  ];
   $info['campaignion_logcrm.payment_exporter']['class'] = PaymentExporter::class;
+  $info['campaignion_logcrm.submission_exporter'] = [
+    'class' => SubmissionExporter::class,
+    'arguments' => [
+      '@campaignion_logcrm.component_plugins',
+      '@campaignion_logcrm.opt_in_exporter',
+    ],
+  ];
   return $info;
 }
 
@@ -177,5 +200,6 @@ function campaignion_logcrm_payment_status_change(Payment $payment, PaymentStatu
 function campaignion_logcrm_campaignion_logcrm_webform_component_exporter_info() {
   $ns = '\\Drupal\\campaignion_logcrm\\WebformComponent\\';
   $info['select'] = $ns . 'Select';
+  $info['verbatim'] = $ns . 'Verbatim';
   return $info;
 }
