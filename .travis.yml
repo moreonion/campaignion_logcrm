@@ -5,6 +5,9 @@ services:
   - mysql
 php:
   - 7.3
+branches:
+  only:
+  - 7.x-1.x
 
 mysql:
   database: drupal
