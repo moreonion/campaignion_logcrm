@@ -28,17 +28,31 @@ class PaymentExporterTest extends DrupalUnitTestCase {
       'name' => 'foo',
       'quantity' => 2,
       'amount' => 3.5,
+      'tax_rate' => 0.1,
+      'description' => 'Description with @arguments',
+      'description_arguments' => ['@arguments' => 'arguments'],
     ]));
     $exporter = new PaymentExporter();
     $data = $exporter->toJson($payment);
     $this->assertEqual([
       'pid' => 42,
       'currency_code' => 'EUR',
-      'total_amount' => 7.0,
+      'total_amount' => 7 * 1.1,
+      'total_amount_subunits' => 770,
       'status' => 'payment_status_new',
       'method_specific' => 'Dummy method',
       'method_generic' => 'Test payment method',
       'controller' => 'controller_machine_name',
+      'line_items' => [
+        'foo' => [
+          'quantity' => 2,
+          'unit_amount_subunits' => 350,
+          'net_amount_subunits' => 700,
+          'tax_rate' => 0.1,
+          'total_amount_subunits' => 770,
+          'description' => 'Description with arguments',
+        ],
+      ],
     ], $data);
   }
 

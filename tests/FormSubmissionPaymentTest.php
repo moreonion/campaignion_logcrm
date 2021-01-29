@@ -20,7 +20,11 @@ class FormSubmissionPaymentTest extends DrupalUnitTestCase {
     $method = entity_create('payment_method', ['controller' => $controller]);
     entity_save('payment_method', $method);
     $payment = entity_create('payment', ['method' => $method]);
-    $payment->setLineItem(new \PaymentLineItem(['amount' => 3]));
+    $payment->setLineItem(new \PaymentLineItem([
+      'name' => 'foo',
+      'amount' => 3,
+      'description' => 'Foo line item',
+    ]));
     entity_save('payment', $payment);
     $this->payment = $payment;
 
@@ -77,11 +81,22 @@ class FormSubmissionPaymentTest extends DrupalUnitTestCase {
     $this->assertEquals([
       'pid' => (int) $this->payment->pid,
       'currency_code' => 'XXX',
-      'total_amount' => 3.0,
+      'total_amount' => 3,
+      'total_amount_subunits' => 3,
       'status' => 'payment_status_new',
       'method_specific' => '',
       'method_generic' => '',
       'controller' => '\\Drupal\\wps_test_method\\DummyController',
+      'line_items' => [
+        'foo' => [
+          'description' => 'Foo line item',
+          'unit_amount_subunits' => 3,
+          'quantity' => 1.0,
+          'tax_rate' => 0,
+          'net_amount_subunits' => 3,
+          'total_amount_subunits' => 3,
+        ],
+      ],
     ], $payment_data);
   }
 
