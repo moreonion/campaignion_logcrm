@@ -127,6 +127,8 @@ class EventTest extends \DrupalUnitTestCase {
           'statement' => '',
           'unsubscribe_all' => TRUE,
           'unsubscribe_unknown' => FALSE,
+          'trigger_opt_in_email' => FALSE,
+          'trigger_welcome_email' => FALSE,
           'lists' => [],
           'ip_address' => '127.0.0.1',
         ],
