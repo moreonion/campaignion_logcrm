@@ -94,9 +94,9 @@ class OptInExporter {
         $opt_in['unsubscribe_unknown'] = variable_get_value('campaignion_newsletters_unsubscribe_unknown');
         $opt_in['trigger_opt_in_email'] = empty($component['extra']['opt_in_implied']);
         $opt_in['trigger_welcome_email'] = !empty($component['extra']['send_welcome']);
-        $opt_in['lists'] = array_map(function ($list_id) use ($list_identifiers) {
+        $opt_in['lists'] = array_values(array_map(function ($list_id) use ($list_identifiers) {
           return $list_identifiers[$list_id];
-        }, $component['extra']['lists']);
+        }, $component['extra']['lists']));
         $opt_in['ip_address'] = $this->ipAddress;
       }
     }
