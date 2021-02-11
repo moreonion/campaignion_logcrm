@@ -121,8 +121,8 @@ class EventTest extends \DrupalUnitTestCase {
       ],
       '_optins' => [
         4 => [
-          'value' => 'opt-in',
-          'raw_value' => 'radios:opt-in',
+          'operation' => 'opt-in',
+          'value' => 'radios:opt-in',
           'channel' => 'email',
           'statement' => '',
           'unsubscribe_all' => TRUE,

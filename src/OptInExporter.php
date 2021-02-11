@@ -84,6 +84,9 @@ class OptInExporter {
     $opt_ins = $submission->opt_in->values();
     $list_identifiers = $this->listIdentifiers;
     foreach ($opt_ins as $cid => &$opt_in) {
+      $opt_in['operation'] = $opt_in['value'];
+      $opt_in['value'] = $opt_in['raw_value'];
+      unset($opt_in['raw_value']);
       if ($opt_in['channel'] == 'email') {
         $component = $submission->node->webform['components'][$cid];
         $opt_in['unsubscribe_all'] = !empty($component['extra']['optout_all_lists']);
