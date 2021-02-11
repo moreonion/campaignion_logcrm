@@ -89,6 +89,7 @@ class OptInExporter {
       unset($opt_in['raw_value']);
       if ($opt_in['channel'] == 'email') {
         $component = $submission->node->webform['components'][$cid];
+        $opt_in['address'] = $submission->valueByKey('email');
         $opt_in['unsubscribe_all'] = !empty($component['extra']['optout_all_lists']);
         $opt_in['unsubscribe_unknown'] = variable_get_value('campaignion_newsletters_unsubscribe_unknown');
         $opt_in['trigger_opt_in_email'] = empty($component['extra']['opt_in_implied']);
