@@ -114,6 +114,9 @@ class EventTest extends \DrupalUnitTestCase {
         'needs_confirmation' => FALSE,
         'type' => 'webform',
         'type_title' => 'Webform',
+        'tags' => [],
+        'source_tags' => [],
+        'campaign_tags' => [],
       ],
       'tracking' => (object) [
         'tags' => [],

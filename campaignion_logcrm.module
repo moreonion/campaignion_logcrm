@@ -23,6 +23,12 @@ if (module_exists('paypal_payment')) {
 if (module_exists('webform_paymethod_select')) {
   require_once 'integrations/webform_paymethod_select.inc';
 }
+if (module_exists('campaignion_supporter_tags')) {
+  require_once 'integrations/campaignion_supporter_tags.inc';
+}
+if (module_exists('campaignion_source_tags')) {
+  require_once 'integrations/campaignion_source_tags.inc';
+}
 
 /**
  * Implements hook_cronapi().
