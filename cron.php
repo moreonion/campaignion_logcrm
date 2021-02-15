@@ -2,6 +2,7 @@
 
 namespace Drupal\campaignion_logcrm;
 
+use Drupal\little_helpers\Rest\HttpError;
 use Drupal\little_helpers\Services\Container;
 
 /**
@@ -17,8 +18,9 @@ function send_queue() {
       $client->sendEvent($item->event);
       $item->delete();
     }
-    catch (ApiError $e) {
-      $e->log();
+    catch (HttpError $e) {
+      $variables['%item_id'] = $item->id;
+      \watchdog_exception('campaignion_logcrm', $e, '%type: !message (item: %item_id)', $variables);
     }
   }
 }
