@@ -5,22 +5,24 @@ namespace Drupal\campaignion_logcrm;
 use \Dflydev\Hawk\Credentials\Credentials;
 use \Dflydev\Hawk\Client\ClientBuilder;
 
+/**
+ * A logCRM API-client using HAWK authentication.
+ */
 class Client {
   protected $client;
   protected $credentials;
   protected $url;
 
-  public static function fromConfig() {
-    $c = variable_get('campaignion_logcrm_credentials', []);
+  public static function fromConfig(array $config) {
     foreach (['events_url', 'public_key', 'secret_key'] as $v) {
-      if (!isset($c[$v])) {
+      if (!isset($config[$v])) {
         throw new ApiConfigError(
           'No valid logcrm credentials found. The credentials must contain ' .
           'at least values for "event_url", "public_key" and "private_key".'
         );
       }
     }
-    return new static($c['events_url'], $c['public_key'], $c['secret_key']);
+    return new static($config['events_url'], $config['public_key'], $config['secret_key']);
   }
 
   public function __construct($url, $pk, $sk) {

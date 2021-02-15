@@ -84,6 +84,11 @@ function campaignion_logcrm_libraries_info() {
  * Implements hook_little_helpers_serices().
  */
 function campaignion_logcrm_little_helpers_services() {
+  $info['campaignion_logcrm.client'] = [
+    'class' => Client::class,
+    'constructor' => 'fromConfig',
+    'arguments' => ['!campaignion_logcrm_credentials'],
+  ];
   $info['campaignion_logcrm.component_plugins'] = [
     'class' => Container::class,
     'arguments' => ['campaignion_logcrm.component_plugins'],
