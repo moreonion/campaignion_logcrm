@@ -1,18 +1,24 @@
 <?php
 
-use \Drupal\campaignion\ContactTypeManager;
-use \Drupal\campaignion\NoEmailException;
-use \Drupal\campaignion\CRM\Import\Source\ArraySource;
-use \Drupal\little_helpers\Services\Container;
-use \Drupal\little_helpers\Webform\Submission;
-use \Drupal\webform_paymethod_select\WebformPaymentContext;
+/**
+ * @file
+ * Hook implementations and callbacks for campaignion_logcrm module.
+ */
 
-use \Drupal\campaignion_logcrm\Client;
-use \Drupal\campaignion_logcrm\Event;
-use \Drupal\campaignion_logcrm\OptInExporter;
-use \Drupal\campaignion_logcrm\PaymentExporter;
-use \Drupal\campaignion_logcrm\QueueItem;
-use \Drupal\campaignion_logcrm\SubmissionExporter;
+use Drupal\campaignion\ContactTypeManager;
+use Drupal\campaignion\NoEmailException;
+use Drupal\campaignion\CRM\Import\Source\ArraySource;
+use Drupal\little_helpers\Services\Container;
+use Drupal\little_helpers\Webform\Submission;
+use Drupal\webform_paymethod_select\WebformPaymentContext;
+
+use Drupal\campaignion_logcrm\Client;
+use Drupal\campaignion_logcrm\Event;
+use Drupal\campaignion_logcrm\NewsletterProvider;
+use Drupal\campaignion_logcrm\OptInExporter;
+use Drupal\campaignion_logcrm\PaymentExporter;
+use Drupal\campaignion_logcrm\QueueItem;
+use Drupal\campaignion_logcrm\SubmissionExporter;
 
 if (module_exists('manual_direct_debit_uk')) {
   require_once 'integrations/manual_direct_debit_uk.inc';
@@ -111,6 +117,17 @@ function campaignion_logcrm_little_helpers_services() {
     ],
   ];
   return $info;
+}
+
+/**
+ * Implements hook_campaignion_newsletters_provider_info().
+ */
+function campaignion_logcrm_campaignion_newsletters_provider_info() {
+  $providers['logcrm'] = [
+    'class' => NewsletterProvider::class,
+    'params' => [],
+  ];
+  return $providers;
 }
 
 /**

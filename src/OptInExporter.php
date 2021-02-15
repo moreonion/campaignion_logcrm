@@ -38,6 +38,9 @@ class OptInExporter {
   public static function listMap(array $lists = NULL) {
     $lists = $lists ?? NewsletterList::listAll();
     return array_map(function ($list) {
+      if ($list->source == 'logcrm') {
+        return $list->identifier;
+      }
       $source = strtolower(explode('-', $list->source, 2)[0]);
       if ($source == 'optivo') {
         $source = 'episerver';
