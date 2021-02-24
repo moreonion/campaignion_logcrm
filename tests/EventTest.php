@@ -33,6 +33,7 @@ class EventTest extends \DrupalUnitTestCase {
           'channel' => 'email',
         ],
       ],
+      5 => ['type' => 'email', 'form_key' => 'email'],
     ];
     foreach ($node->webform['components'] as $cid => &$component) {
       webform_component_defaults($component);
@@ -91,6 +92,7 @@ class EventTest extends \DrupalUnitTestCase {
       2 => [57],
       3 => [NULL],
       4 => ['radios:opt-in'],
+      5 => ['test@example.com'],
     ];
 
     $e = Event::fromSubmission($submission);
@@ -102,6 +104,7 @@ class EventTest extends \DrupalUnitTestCase {
       'is_draft' => FALSE,
       'text' => 'TestText',
       'number' => 57,
+      'email' => 'test@example.com',
       'email_opt_in' => 'radios:opt-in',
       'uuid' => 'test-uuid',
       'type' => 'form_submission',
@@ -111,6 +114,9 @@ class EventTest extends \DrupalUnitTestCase {
         'needs_confirmation' => FALSE,
         'type' => 'webform',
         'type_title' => 'Webform',
+        'tags' => [],
+        'source_tags' => [],
+        'campaign_tags' => [],
       ],
       'tracking' => (object) [
         'tags' => [],
@@ -121,12 +127,15 @@ class EventTest extends \DrupalUnitTestCase {
       ],
       '_optins' => [
         4 => [
-          'value' => 'opt-in',
-          'raw_value' => 'radios:opt-in',
+          'address' => 'test@example.com',
+          'operation' => 'opt-in',
+          'value' => 'radios:opt-in',
           'channel' => 'email',
           'statement' => '',
           'unsubscribe_all' => TRUE,
           'unsubscribe_unknown' => FALSE,
+          'trigger_opt_in_email' => FALSE,
+          'trigger_welcome_email' => FALSE,
           'lists' => [],
           'ip_address' => '127.0.0.1',
         ],

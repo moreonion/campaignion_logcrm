@@ -33,8 +33,8 @@ before_script:
   - php -d include_path=`pwd` -d sendmail_path=`which true` $COMPOSER_HOME/vendor/bin/drush.php --yes core-quick-drupal --core=drupal-7.69 --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --root=$root
   - ln -s $repo $root/sites/all/modules/module_under_test
   - cd $root
-  - drush dl campaignion-7.x-2.19-alpha1 libraries little_helpers-2.0-alpha11 ultimate_cron webform_paymethod_select webform_submission_uuid xautoload
-  - drush --yes pm-enable campaignion_logcrm campaignion_newsletters wps_test_method
+  - drush dl campaignion-7.x-2.19-alpha1 i18n libraries little_helpers-2.0-alpha11 ultimate_cron webform_paymethod_select webform_submission_uuid xautoload
+  - drush --yes pm-enable campaignion_logcrm campaignion_newsletters campaignion_supporter_tags campaignion_source_tags wps_test_method
 
 script:
   - cd $repo

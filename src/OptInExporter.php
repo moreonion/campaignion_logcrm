@@ -38,6 +38,9 @@ class OptInExporter {
   public static function listMap(array $lists = NULL) {
     $lists = $lists ?? NewsletterList::listAll();
     return array_map(function ($list) {
+      if ($list->source == 'logcrm') {
+        return $list->identifier;
+      }
       $source = strtolower(explode('-', $list->source, 2)[0]);
       if ($source == 'optivo') {
         $source = 'episerver';
@@ -84,13 +87,19 @@ class OptInExporter {
     $opt_ins = $submission->opt_in->values();
     $list_identifiers = $this->listIdentifiers;
     foreach ($opt_ins as $cid => &$opt_in) {
+      $opt_in['operation'] = $opt_in['value'];
+      $opt_in['value'] = $opt_in['raw_value'];
+      unset($opt_in['raw_value']);
       if ($opt_in['channel'] == 'email') {
         $component = $submission->node->webform['components'][$cid];
+        $opt_in['address'] = $submission->valueByKey('email');
         $opt_in['unsubscribe_all'] = !empty($component['extra']['optout_all_lists']);
         $opt_in['unsubscribe_unknown'] = variable_get_value('campaignion_newsletters_unsubscribe_unknown');
-        $opt_in['lists'] = array_map(function ($list_id) use ($list_identifiers) {
+        $opt_in['trigger_opt_in_email'] = empty($component['extra']['opt_in_implied']);
+        $opt_in['trigger_welcome_email'] = !empty($component['extra']['send_welcome']);
+        $opt_in['lists'] = array_values(array_map(function ($list_id) use ($list_identifiers) {
           return $list_identifiers[$list_id];
-        }, $component['extra']['lists']);
+        }, $component['extra']['lists']));
         $opt_in['ip_address'] = $this->ipAddress;
       }
     }

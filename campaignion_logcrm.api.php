@@ -40,6 +40,24 @@ function hook_campaignion_logcrm_webform_component_exporter_info_alter(array &$i
  * Allow other modules to modify the event data.
  *
  * @param array $data
+ *   The event data to alter.
+ * @param string $type
+ *   The event type.
+ * @param array $context
+ *   An associative array of data used as source for generating the event data.
+ *   The data in this array depends on the type of event.
+ */
+function hook_campaignion_logcrm_event_data_alter(array &$data, $type, array $context) {
+  if ($type == 'form_submission') {
+    $submission = $context['submission'];
+    $data['_tags'] = $submission->tracking->tags;
+  }
+}
+
+/**
+ * Allow other modules to modify the event data.
+ *
+ * @param array $data
  *   Original event data array.
  * @param string $type
  *   The event type.
