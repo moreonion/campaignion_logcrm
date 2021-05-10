@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Define the schema, install and update hooks.
+ */
+
+/**
+ * Implements hook_schema().
+ */
 function campaignion_logcrm_schema() {
   $tables['campaignion_logcrm_queue'] = [
     'description' => 'Send queue for logcrm events.',
@@ -37,4 +45,28 @@ function campaignion_logcrm_schema() {
     'primary key' => array('type', 'id'),
   ];
   return $tables;
+}
+
+/**
+ * Helper function to set the module weight.
+ */
+function _campaignion_logcrm_set_weight($module, $weight) {
+  db_update('system')
+    ->fields(array('weight' => $weight))
+    ->condition('name', $module)
+    ->execute();
+}
+
+/**
+ * Implements hook_install().
+ */
+function campaignion_logcrm_install() {
+  _campaignion_logcrm_set_weight('campaignion_logcrm', 100);
+}
+
+/**
+ * Set the module weight.
+ */
+function campaignion_logcrm_7101() {
+  _campaignion_logcrm_set_weight('campaignion_logcrm', 100);
 }
