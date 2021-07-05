@@ -99,7 +99,7 @@ class EventTest extends \DrupalUnitTestCase {
     $a = $e->toArray();
     unset($a['date']);
     $nid = $submission->node->nid;
-    $link_options = ['absolute' => TRUE, 'alias' => TRUE];
+    $link_options = ['absolute' => TRUE, 'alias' => FALSE];
     $this->assertEquals([
       'is_draft' => FALSE,
       'text' => 'TestText',
@@ -123,6 +123,7 @@ class EventTest extends \DrupalUnitTestCase {
       ],
       '_links' => [
         'action' => url("node/$nid", $link_options),
+        'action_pretty_url' => url("node/$nid", ['alias' => TRUE] + $link_options),
         'submission' => url("node/$nid/submission/{$submission->sid}", $link_options),
       ],
       '_optins' => [

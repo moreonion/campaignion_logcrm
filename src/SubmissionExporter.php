@@ -84,9 +84,10 @@ class SubmissionExporter {
     if ($submission->tracking) {
       $data['tracking'] = $submission->tracking;
     }
-    $link_options = ['absolute' => TRUE, 'alias' => TRUE];
+    $link_options = ['absolute' => TRUE, 'alias' => FALSE];
     $nid = $submission->node->nid;
     $data['_links'] = [
+      'action_pretty_url' => url("node/$nid", ['alias' => TRUE] + $link_options),
       'action' => url("node/$nid", $link_options),
       'submission' => url("node/$nid/submission/{$submission->sid}", $link_options),
     ];
