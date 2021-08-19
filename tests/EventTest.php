@@ -53,6 +53,7 @@ class EventTest extends \DrupalUnitTestCase {
       'is_draft' => 0,
       'uuid' => 'test-uuid',
       'submitted' => 1445948845,
+      'completed' => 1445948846,
       'tracking' => (object) [
         'tags' => [],
       ],
@@ -141,6 +142,8 @@ class EventTest extends \DrupalUnitTestCase {
           'ip_address' => '127.0.0.1',
         ],
       ],
+      '_submitted_at' => '2015-10-27T12:27:25+0000',
+      '_completed_at' => '2015-10-27T12:27:26+0000',
     ], $a);
   }
 

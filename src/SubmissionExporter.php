@@ -78,6 +78,8 @@ class SubmissionExporter {
         $data[$component['form_key']] = $value;
       }
     }
+    $data['_submitted_at'] = date(DATE_ISO8601, $submission->submitted);
+    $data['_completed_at'] = isset($submission->completed) ? date(DATE_ISO8601, $submission->completed) : NULL;
     $data['action'] = $this->actionData($submission);
     $data['uuid'] = $submission->uuid;
     $data['is_draft'] = (bool) $submission->is_draft;
