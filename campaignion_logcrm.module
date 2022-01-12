@@ -131,50 +131,6 @@ function campaignion_logcrm_campaignion_newsletters_provider_info() {
 }
 
 /**
- * Implements hook_xmlrpc().
- */
-function campaignion_logcrm_xmlrpc() {
-  $callbacks[] = [
-    'campaignion.logcrm.post_event',
-    'campaignion_logcrm_post_event',
-    ['struct', 'string', 'string'], // event JSON and signature.
-    t('Post JSON dumps to be imported by campaignion'),
-  ];
-  return $callbacks;
-}
-
-/**
- * Import a JSON dump into campaignions contacts.
- */
-function campaignion_logcrm_post_event($event, $signature) {
-  $c = variable_get('campaignion_logcrm_credentials', []);
-  if (!isset($c['secret_key'])) {
-    return (object) ['code' => 401, 'message' => 'No secret key configured'];
-  }
-  if (hash_hmac('sha256', $event, $c['secret_key']) != $signature) {
-    return (object) ['code' => 401, 'message' => 'Unauthorized'];
-  }
-  $data = drupal_json_decode($event);
-  if (!is_array($data)) {
-    return (object) ['code' => 400, 'message' => 'Event must be a JSON object'];
-  }
-
-  $importer = ContactTypeManager::instance()->importer('campaignion_logcrm');
-  $source = new ArraySource($data);
-  try {
-    $contact = $importer->findOrCreateContact($source);
-    if ($importer->import($source, $contact)) {
-      $contact->save();
-      return (object) ['code' => 200,  'message' => 'Contact saved.'];
-    }
-    return (object) ['code' => 200,  'message' => 'Contact unchanged.'];
-  }
-  catch (NoEmailException $e) {
-    return (object) ['code' => 404, 'message' => 'Missing email in record.'];
-  }
-}
-
-/**
  * Implements hook_webform_submission_insert().
  */
 function campaignion_logcrm_webform_submission_insert($node, $submission) {
