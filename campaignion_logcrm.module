@@ -51,49 +51,15 @@ function campaignion_logcrm_cronapi($op, $job = NULL) {
 }
 
 /**
- * Implements hook_libraries_info().
- */
-function campaignion_logcrm_libraries_info() {
-  $libraries['dflydev-hawk'] = [
-    'name' => 'Hawk — A PHP Implementation',
-    'vendor url' => 'https://github.com/dflydev/dflydev-hawk',
-    'download url' => 'https://github.com/dflydev/dflydev-hawk',
-    'version' => '0.0.0',
-    'xautoload' => function($adapter) {
-       $adapter->composerJson('composer.json');
-    },
-    'dependencies' => ['RandomLib (>=1.0)'],
-  ];
-  $libraries['RandomLib'] = [
-    'name' => 'RandomLib — A library for generating random numbers and strings of various strengths.',
-    'vendor url' => 'https://github.com/ircmaxell/RandomLib',
-    'download url' => 'https://github.com/ircmaxell/RandomLib',
-    'version' => '1.1.0',
-    'xautoload' => function($adapter) {
-       $adapter->composerJson('composer.json');
-    },
-    'dependencies' => ['SecurityLib (>=1.1)'],
-  ];
-  $libraries['SecurityLib'] = [
-    'name' => 'SecurityLib',
-    'vendor url' => 'https://github.com/ircmaxell/SecurityLib',
-    'download url' => 'https://github.com/ircmaxell/SecurityLib',
-    'version' => '1.1.0',
-    'xautoload' => function($adapter) {
-       $adapter->composerJson('composer.json');
-    },
-  ];
-  return $libraries;
-}
-
-/**
  * Implements hook_little_helpers_serices().
  */
 function campaignion_logcrm_little_helpers_services() {
   $info['campaignion_logcrm.client'] = [
     'class' => Client::class,
-    'constructor' => 'fromConfig',
-    'arguments' => ['!campaignion_logcrm_credentials'],
+    'arguments' => [
+      '!campaignion_logcrm_api_url',
+      '@campaignion_auth.AuthAppClient',
+    ],
   ];
   $info['campaignion_logcrm.component_plugins'] = [
     'class' => Container::class,
@@ -128,50 +94,6 @@ function campaignion_logcrm_campaignion_newsletters_provider_info() {
     'params' => [],
   ];
   return $providers;
-}
-
-/**
- * Implements hook_xmlrpc().
- */
-function campaignion_logcrm_xmlrpc() {
-  $callbacks[] = [
-    'campaignion.logcrm.post_event',
-    'campaignion_logcrm_post_event',
-    ['struct', 'string', 'string'], // event JSON and signature.
-    t('Post JSON dumps to be imported by campaignion'),
-  ];
-  return $callbacks;
-}
-
-/**
- * Import a JSON dump into campaignions contacts.
- */
-function campaignion_logcrm_post_event($event, $signature) {
-  $c = variable_get('campaignion_logcrm_credentials', []);
-  if (!isset($c['secret_key'])) {
-    return (object) ['code' => 401, 'message' => 'No secret key configured'];
-  }
-  if (hash_hmac('sha256', $event, $c['secret_key']) != $signature) {
-    return (object) ['code' => 401, 'message' => 'Unauthorized'];
-  }
-  $data = drupal_json_decode($event);
-  if (!is_array($data)) {
-    return (object) ['code' => 400, 'message' => 'Event must be a JSON object'];
-  }
-
-  $importer = ContactTypeManager::instance()->importer('campaignion_logcrm');
-  $source = new ArraySource($data);
-  try {
-    $contact = $importer->findOrCreateContact($source);
-    if ($importer->import($source, $contact)) {
-      $contact->save();
-      return (object) ['code' => 200,  'message' => 'Contact saved.'];
-    }
-    return (object) ['code' => 200,  'message' => 'Contact unchanged.'];
-  }
-  catch (NoEmailException $e) {
-    return (object) ['code' => 404, 'message' => 'Missing email in record.'];
-  }
 }
 
 /**

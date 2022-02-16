@@ -3,6 +3,7 @@ description = Integration module for LogCRM: Send events to LogCRM and let it ta
 core = 7.x
 php = 7.3
 
+dependencies[] = campaignion:campaignion_auth (>=2.20)
 dependencies[] = campaignion:campaignion_newsletters (>=2.10)
 dependencies[] = campaignion:campaignion_opt_in (>=2.19-alpha1)
 dependencies[] = libraries
@@ -10,4 +11,3 @@ dependencies[] = little_helpers:little_helpers (>=2.0-alpha11)
 dependencies[] = ultimate_cron
 dependencies[] = webform_paymethod_select
 dependencies[] = webform_submission_uuid
-dependencies[] = xautoload (>= 7.x-5.0)

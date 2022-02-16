@@ -2,55 +2,42 @@
 
 namespace Drupal\campaignion_logcrm;
 
-use \Dflydev\Hawk\Credentials\Credentials;
-use \Dflydev\Hawk\Client\ClientBuilder;
-
-use \Drupal\little_helpers\Rest\Client as RestClient;
+use Drupal\campaignion_auth\AuthAppClient;
+use Drupal\little_helpers\Rest\Client as RestClient;
 
 /**
  * A logCRM API-client using HAWK authentication.
  */
 class Client extends RestClient {
 
-  protected $client;
-  protected $credentials;
+  const API_VERSION = 'v1';
 
-  public static function fromConfig(array $config) {
-    foreach (['endpoint', 'public_key', 'secret_key'] as $v) {
-      if (!isset($config[$v])) {
-        throw new ApiConfigError(
-          'No valid logcrm credentials found. The credentials must contain ' .
-          'at least values for "endpoint", "public_key" and "private_key".'
-        );
-      }
-    }
-    return new static($config['endpoint'], $config['public_key'], $config['secret_key']);
-  }
+  /**
+   * A auth app API client.
+   *
+   * @var \Drupal\campaignion_email_to_target\Api\AuthAppClient
+   */
+  protected $authClient;
 
   /**
    * Create a new instance.
+   *
+   * @param string $url
+   *   The URL for the API endpoint (withut the version prefix).
+   * @param \Drupal\campaignion_auth\AuthAppClient $auth_client
+   *   A auth app API client.
    */
-  public function __construct($endpoint, $pk, $sk) {
-    parent::__construct($endpoint);
-    $this->credentials = new Credentials($sk, 'sha256', $pk);
-    $this->client = ClientBuilder::create()->build();
+  public function __construct(string $url, AuthAppClient $auth_client) {
+    parent::__construct($url . '/' . static::API_VERSION);
+    $this->authClient = $auth_client;
   }
 
   /**
-   * Add the HAWK authentication headers and send.
+   * Add the JWT Authorization header to the request.
    */
   protected function sendRequest($url, array $options) {
-    $request_options = [];
-    if (isset($options['data'])) {
-      $request_options['content_type'] = $options['headers']['Content-Type'];
-      $request_options['payload'] = $options['data'];
-    }
-    else {
-      $request_options['content_type'] = '';
-      $request_options['payload'] = '';
-    }
-    $hawk = $this->client->createRequest($this->credentials, $url, $options['method'], $request_options);
-    $options['headers'][$hawk->header()->fieldName()] = $hawk->header()->fieldValue();
+    $token = $this->authClient->getToken();
+    $options['headers']['Authorization'] = "Bearer $token";
     return parent::sendRequest($url, $options);
   }
 
