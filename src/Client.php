@@ -20,16 +20,26 @@ class Client extends RestClient {
   protected $authClient;
 
   /**
+   * The Impact-Stack organization that owns the data that’s being sent.
+   *
+   * @var string
+   */
+  protected $organization;
+
+  /**
    * Create a new instance.
    *
    * @param string $url
    *   The URL for the API endpoint (withut the version prefix).
    * @param \Drupal\campaignion_auth\AuthAppClient $auth_client
    *   A auth app API client.
+   * @param string $organization
+   *   The current site’s impact-stack organization.
    */
-  public function __construct(string $url, AuthAppClient $auth_client) {
+  public function __construct(string $url, AuthAppClient $auth_client, string $organization) {
     parent::__construct($url . '/' . static::API_VERSION);
     $this->authClient = $auth_client;
+    $this->organization = $organization;
   }
 
   /**
@@ -45,7 +55,9 @@ class Client extends RestClient {
    * Send an event to the API.
    */
   public function sendEvent(Event $event) {
-    return $this->post('/events', [], $event->toArray());
+    $event_data = $event->toArray();
+    $event_data['organization'] = $this->organization;
+    return $this->post('/events', [], $event_data);
   }
 
 }

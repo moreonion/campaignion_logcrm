@@ -59,6 +59,7 @@ function campaignion_logcrm_little_helpers_services() {
     'arguments' => [
       '!campaignion_logcrm_api_url',
       '@campaignion_auth.AuthAppClient',
+      '!campaignion_organization',
     ],
   ];
   $info['campaignion_logcrm.component_plugins'] = [
