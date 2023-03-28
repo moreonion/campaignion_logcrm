@@ -6,7 +6,7 @@ on:
 
 jobs:
   phpunit:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         php-versions: ["7.3", "7.4"]
@@ -25,6 +25,7 @@ jobs:
       run: |
         sudo systemctl start mysql
         mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+        mysql -e "ALTER USER '${{ env.DB_USER }}'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
     - name: Set env
       run: |
         echo "REPO=`pwd`" >> $GITHUB_ENV
