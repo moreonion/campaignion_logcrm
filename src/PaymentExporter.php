@@ -24,7 +24,11 @@ class PaymentExporter {
     $data['status'] = $status->status;
     $data['method_specific'] = $payment->method->title_specific;
     $data['method_generic'] = $payment->method->title_generic;
-    $data['controller'] = $payment->method->controller->name;
+    $controller = $payment->method->controller;
+    $data['controller'] = $controller->name;
+    if (webform_paymethod_select_implements_data_interface($controller)) {
+      $data['payment_data'] = $controller->webformData($payment);
+    }
     return $data;
   }
 
