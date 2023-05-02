@@ -35,7 +35,10 @@ class NewsletterProviderTest extends DrupalUnitTestCase {
       'global_identifier' => 'provider:foo',
       'title' => 'Foo list',
     ];
-    $this->client->method('get')->willReturn($result);
+    $this->client->method('get')->with(
+      $this->equalTo('/newsletter/lists'),
+      $this->equalTo(['organization' => variable_get_value('campaignion_organization')]),
+    )->willReturn($result);
     $lists = $this->provider->getLists();
     $this->assertCount(1, $lists);
     $list = $lists[0];
