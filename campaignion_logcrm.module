@@ -37,6 +37,17 @@ if (module_exists('campaignion_source_tags')) {
 }
 
 /**
+ * Implements hook_module_implements_alter().
+ */
+function campaignion_logcrm_module_implements_alter(array &$impl, $hook) {
+  if ($hook == 'webform_submission_insert' || $hook == 'webform_submission_update') {
+    $group = $impl['campaignion_logcrm'];
+    unset($impl['campaignion_logcrm']);
+    $impl['campaignion_logcrm'] = $group;
+  }
+}
+
+/**
  * Implements hook_cronapi().
  */
 function campaignion_logcrm_cronapi($op, $job = NULL) {
