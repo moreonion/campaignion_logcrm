@@ -2,7 +2,9 @@
 
 namespace Drupal\campaignion_logcrm;
 
+use Drupal\campaignion_logcrm\Tests\MockSubmission;
 use Drupal\manual_direct_debit_uk\AccountDataController;
+use Drupal\webform_paymethod_select\WebformPaymentContext;
 use Drupal\wps_test_method\DummyController;
 use Upal\DrupalUnitTestCase;
 
@@ -30,9 +32,19 @@ class PaymentExporterTest extends DrupalUnitTestCase {
       'quantity' => 2,
       'amount' => 3.5,
     ]));
-    $exporter = new PaymentExporter();
-    $data = $exporter->toJson($payment);
+    $payment->contextObj = $this->getMockBuilder(WebformPaymentContext::class)
+      ->disableOriginalConstructor()
+      ->getMock();
+    $submission = MockSubmission::createWithComponents((object) ['uuid' => 'submission-uuid']);
+    $payment->contextObj->method('getSubmission')->willReturn($submission);
+    $submission_exporter = $this->getMockBuilder(SubmissionExporter::class)
+      ->disableOriginalConstructor()
+      ->getMock();
+    $submission_exporter->method('actionData')->willReturn(['uuid' => 'action-uuid']);
+    $exporter = new PaymentExporter($submission_exporter);
+    $event = $exporter->createSuccessEvent($payment);
     $this->assertEqual([
+      'uuid' => 'submission-uuid',
       'pid' => 42,
       'currency_code' => 'EUR',
       'total_amount' => 7.0,
@@ -40,7 +52,26 @@ class PaymentExporterTest extends DrupalUnitTestCase {
       'method_specific' => 'Dummy method',
       'method_generic' => 'Test payment method',
       'controller' => 'controller_machine_name',
-    ], $data);
+      'action' => [
+        'uuid' => 'action-uuid',
+      ],
+    ], $event->data);
+
+    $previous_status_item = $payment->getStatus();
+    $payment->statuses[] = new \PaymentStatusItem(PAYMENT_STATUS_SUCCESS);
+    $event = $exporter->createStatusChangeEvent($payment, $previous_status_item);
+    $this->assertEqual([
+      'pid' => 42,
+      'currency_code' => 'EUR',
+      'total_amount' => 7.0,
+      'status' => 'payment_status_success',
+      'method_specific' => 'Dummy method',
+      'method_generic' => 'Test payment method',
+      'controller' => 'controller_machine_name',
+      'status_old' => 'payment_status_new',
+      'status_new' => 'payment_status_success',
+      'uuid' => 'submission-uuid',
+    ], $event->data);
   }
 
   /**
@@ -71,9 +102,8 @@ class PaymentExporterTest extends DrupalUnitTestCase {
       'bank_code' => '601613',
       'payment_date' => '15',
     ];
-    $exporter = new PaymentExporter();
-    $data = $exporter->toJson($payment);
-    drupal_alter('campaignion_logcrm_payment_event_data', $data, $payment);
+    $exporter = new PaymentExporter($this->createMock(SubmissionExporter::class));
+    $data = $exporter->paymentData($payment);
     $this->assertEqual([
       'pid' => 42,
       'currency_code' => 'EUR',

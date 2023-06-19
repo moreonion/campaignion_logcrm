@@ -7,29 +7,64 @@ namespace Drupal\campaignion_logcrm;
  */
 class PaymentExporter {
 
+  protected $submissionExporter;
+
   /**
-   * Export a payment object to something we want to transmit in logCRM events.
+   * Create a new payment exporter.
+   */
+  public function __construct(SubmissionExporter $submission_exporter) {
+    $this->submissionExporter = $submission_exporter;
+  }
+
+  /**
+   * Generate the event data for a payment object.
    *
    * @param \Payment $payment
-   *   The pament to export.
+   *   The payment to export.
    *
    * @return array
-   *   An associative array of data for this payment.
+   *   An associative array with the payment’s data.
    */
-  public function toJson(\Payment $payment) {
-    $data['pid'] = $payment->pid;
+  public function paymentData(\Payment $payment) {
     $status = $payment->getStatus();
-    $data['currency_code'] = $payment->currency_code;
-    $data['total_amount'] = $payment->totalAmount(TRUE);
-    $data['status'] = $status->status;
-    $data['method_specific'] = $payment->method->title_specific;
-    $data['method_generic'] = $payment->method->title_generic;
     $controller = $payment->method->controller;
-    $data['controller'] = $controller->name;
+    $data = [
+      'pid' => $payment->pid,
+      'currency_code' => $payment->currency_code,
+      'total_amount' => $payment->totalAmount(TRUE),
+      'status' => $status->status,
+      'method_specific' => $payment->method->title_specific,
+      'method_generic' => $payment->method->title_generic,
+      'controller' => $controller->name,
+    ];
     if (webform_paymethod_select_implements_data_interface($controller)) {
       $data['payment_data'] = $controller->webformData($payment);
     }
+
+    // Let other modules alter the data.
+    // Deprecated: Use campaignion_logcrm_event_data_alter() instead.
+    drupal_alter('campaignion_logcrm_payment_event_data', $data, $payment);
     return $data;
+  }
+
+  /**
+   * Create a payment_success event from a payment object.
+   *
+   * @param \Payment $payment
+   *   The payment to export.
+   *
+   * @return Event
+   *   A webhook event with data for the payment.
+   */
+  public function createSuccessEvent(\Payment $payment) {
+    $data = $this->paymentData($payment);
+    $submission = $payment->contextObj->getSubmission();
+    $data['uuid'] = $submission->uuid;
+    $data['action'] = $this->submissionExporter->actionData($submission);
+
+    $context['payment'] = $payment;
+    $context['submission'] = $submission;
+    return Event::fromData('payment_success', $payment->getStatus()->created, $data, $context);
   }
 
 }

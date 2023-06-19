@@ -6,9 +6,9 @@ use Drupal\little_helpers\Services\Container;
 use Drupal\little_helpers\Webform\Submission;
 
 class Event {
-  protected $type;
-  protected $date;
-  protected $data;
+  public $type;
+  public $date;
+  public $data;
 
   public static function fromSubmission(Submission $submission, $type = 'form_submission') {
     $data = Container::get()->loadService('campaignion_logcrm.submission_exporter')->data($submission);
@@ -37,20 +37,6 @@ class Event {
   public static function fromData($type, $time, array $data, array $context) {
     drupal_alter('campaignion_logcrm_event_data', $data, $type, $context);
     return new static($type, $time, $data);
-  }
-
-  public static function fromPayment(\Payment $payment, $type = 'payment_success') {
-    $exporter = Container::get()->loadService('campaignion_logcrm.payment_exporter');
-    $submission_obj = $payment->contextObj->getSubmission();
-    $data['uuid'] = $submission_obj->uuid;
-    $data['action'] = Container::get()->loadService('campaignion_logcrm.submission_exporter')->actionData($submission_obj);
-    $data += $exporter->toJson($payment);
-
-    // Let other modules alter the data.
-    drupal_alter('campaignion_logcrm_payment_event_data', $data, $payment);
-    $context['payment'] = $payment;
-    $context['submission'] = $submission_obj;
-    return static::fromData($type, $payment->getStatus()->created, $data, $context);
   }
 
   public function __construct($type, $date = NULL, $data = []) {

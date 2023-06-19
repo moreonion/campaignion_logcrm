@@ -86,7 +86,12 @@ function campaignion_logcrm_little_helpers_services() {
     'class' => OptInExporter::class,
     'constructor' => 'fromConfig',
   ];
-  $info['campaignion_logcrm.payment_exporter']['class'] = PaymentExporter::class;
+  $info['campaignion_logcrm.payment_exporter'] = [
+    'class' => PaymentExporter::class,
+    'arguments' => [
+      '@campaignion_logcrm.submission_exporter',
+    ],
+  ];
   $info['campaignion_logcrm.submission_exporter'] = [
     'class' => SubmissionExporter::class,
     'arguments' => [
@@ -145,14 +150,15 @@ function campaignion_logcrm_webform_confirm_email_email_confirmed($node, $submis
 function campaignion_logcrm_payment_status_change(Payment $payment, PaymentStatusItem $previous_status_item) {
   $statusChangedToSuccess = $payment->getStatus()->status == PAYMENT_STATUS_SUCCESS && $previous_status_item->status != PAYMENT_STATUS_SUCCESS;
   $hasContextObj = $payment->contextObj instanceof WebformPaymentContext;
-  if (!$statusChangedToSuccess || !$hasContextObj)
+  if (!$statusChangedToSuccess || !$hasContextObj) {
     return;
-  // Send payment event.
-  $e = Event::fromPayment($payment);
+  }
+  $exporter = Container::get()->loadService('campaignion_logcrm.payment_exporter');
+  // Queue the payment success event for sending.
   QueueItem::byData([
     'type' => 'payment',
     'id' => $payment->pid,
-    'event' => $e,
+    'event' => $exporter->createSuccessEvent($payment),
   ])->save();
 }
 
