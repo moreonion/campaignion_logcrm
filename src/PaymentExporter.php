@@ -67,4 +67,27 @@ class PaymentExporter {
     return Event::fromData('payment_success', $payment->getStatus()->created, $data, $context);
   }
 
+  /**
+   * Create a payment_status_change event.
+   *
+   * @param \Payment $payment
+   *   The payment for which to report the status change.
+   * @param \PaymentStatusItem $prev_status_item
+   *   The previous status item.
+   *
+   * @return Event
+   *   A logCRM event with data for the payment status change.
+   */
+  public function createStatusChangeEvent(\Payment $payment, \PaymentStatusItem $prev_status_item) {
+    $data = $this->paymentData($payment);
+    $status = $payment->getStatus();
+    $data['status_old'] = $prev_status_item->status;
+    $data['status_new'] = $status->status;
+    $submission = $payment->contextObj->getSubmission();
+    $data['uuid'] = $submission->uuid;
+    $context['payment'] = $payment;
+    $context['submission'] = $submission;
+    return Event::fromData('payment_status_change', $status->created, $data, $context);
+  }
+
 }

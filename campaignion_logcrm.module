@@ -163,6 +163,48 @@ function campaignion_logcrm_payment_status_change(Payment $payment, PaymentStatu
 }
 
 /**
+ * Implements hook_payment_insert().
+ */
+function campaignion_logcrm_payment_insert(Payment $payment) {
+  return campaignion_logcrm_payment_update($payment);
+}
+
+/**
+ * Implements hook_payment_update().
+ */
+function campaignion_logcrm_payment_update(Payment $payment) {
+  if (!$payment->contextObj instanceof WebformPaymentContext) {
+    return;
+  }
+  $exporter = Container::get()->loadService('campaignion_logcrm.payment_exporter');
+  $last_psiid_handled = $payment->original->psiid_last ?? 0;
+  $pending_after_new = FALSE;
+  $previous_item = NULL;
+  foreach ($payment->statuses as $item) {
+    if (payment_status_is_or_has_ancestor($item->status, PAYMENT_STATUS_NEW)) {
+      $pending_after_new = FALSE;
+    }
+    if (payment_status_is_or_has_ancestor($item->status, PAYMENT_STATUS_PENDING)) {
+      $pending_after_new = TRUE;
+      // Don’t send PENDING statuses themselves.
+      $previous_item = $item;
+      continue;
+    }
+    // Skip anything before PENDING and anything that has already been sent.
+    if (!$pending_after_new || $item->psiid <= $last_psiid_handled) {
+      $previous_item = $item;
+      continue;
+    }
+    QueueItem::byData([
+      'type' => 'payment_status_item',
+      'id' => $payment->getStatus()->psiid,
+      'event' => $exporter->createStatusChangeEvent($payment, $previous_item),
+    ])->save();
+    $previous_item = $item;
+  }
+}
+
+/**
  * Implements hook_campaignion_logcrm_webform_component_exporter_info().
  */
 function campaignion_logcrm_campaignion_logcrm_webform_component_exporter_info() {
