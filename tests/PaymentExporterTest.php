@@ -65,11 +65,10 @@ class PaymentExporterTest extends DrupalUnitTestCase {
       'currency_code' => 'EUR',
       'total_amount' => 7.0,
       'status' => 'payment_status_success',
+      'previous_status' => 'payment_status_new',
       'method_specific' => 'Dummy method',
       'method_generic' => 'Test payment method',
       'controller' => 'controller_machine_name',
-      'status_old' => 'payment_status_new',
-      'status_new' => 'payment_status_success',
       'uuid' => 'submission-uuid',
     ], $event->data);
   }

@@ -81,8 +81,7 @@ class PaymentExporter {
   public function createStatusChangeEvent(\Payment $payment, \PaymentStatusItem $prev_status_item) {
     $data = $this->paymentData($payment);
     $status = $payment->getStatus();
-    $data['status_old'] = $prev_status_item->status;
-    $data['status_new'] = $status->status;
+    $data['previous_status'] = $prev_status_item->status;
     $submission = $payment->contextObj->getSubmission();
     $data['uuid'] = $submission->uuid;
     $context['payment'] = $payment;
