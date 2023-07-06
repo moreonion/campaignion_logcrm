@@ -189,8 +189,13 @@ function campaignion_logcrm_payment_update(Payment $payment) {
       $previous_item = $item;
       continue;
     }
-    // Skip anything before PENDING and anything that has already been sent.
-    if (!$pending_after_new || $item->psiid <= $last_psiid_handled) {
+    // Skip anything that has already been sent.
+    if ($item->psiid <= $last_psiid_handled) {
+      $previous_item = $item;
+      continue;
+    }
+    // Skip anything before PENDING unless it’s a SUCCESS.
+    if (!$pending_after_new && !payment_status_is_or_has_ancestor($item->status, PAYMENT_STATUS_SUCCESS)) {
       $previous_item = $item;
       continue;
     }
