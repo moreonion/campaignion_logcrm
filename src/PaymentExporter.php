@@ -50,6 +50,9 @@ class PaymentExporter {
   /**
    * Create a payment_success event from a payment object.
    *
+   * @deprecated in 1.13 and will be removed in 2.x.
+   *   Use the payment_status_change events instead.
+   *
    * @param \Payment $payment
    *   The payment to export.
    *
