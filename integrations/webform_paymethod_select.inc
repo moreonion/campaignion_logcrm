@@ -23,7 +23,7 @@ function webform_paymethod_select_campaignion_logcrm_event_data_alter(array &$da
 
     $exporter = Container::get()->loadService('campaignion_logcrm.payment_exporter');
     foreach (array_filter($submission->payments) as $cid => $payment) {
-      $data['_payments'][$cid] = $exporter->toJson($payment);
+      $data['_payments'][$cid] = $exporter->paymentData($payment);
     }
   }
 }

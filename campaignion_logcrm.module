@@ -17,7 +17,7 @@ use Drupal\campaignion_logcrm\Event;
 use Drupal\campaignion_logcrm\NewsletterProvider;
 use Drupal\campaignion_logcrm\OptInExporter;
 use Drupal\campaignion_logcrm\PaymentExporter;
-use Drupal\campaignion_logcrm\QueueItem;
+use Drupal\campaignion_logcrm\Queue;
 use Drupal\campaignion_logcrm\SubmissionExporter;
 
 if (module_exists('manual_direct_debit_uk')) {
@@ -73,6 +73,7 @@ function campaignion_logcrm_little_helpers_services() {
       '!campaignion_organization',
     ],
   ];
+  $info['campaignion_logcrm.queue']['class'] = Queue::class;
   $info['campaignion_logcrm.component_plugins'] = [
     'class' => Container::class,
     'arguments' => ['campaignion_logcrm.component_plugins'],
@@ -86,7 +87,12 @@ function campaignion_logcrm_little_helpers_services() {
     'class' => OptInExporter::class,
     'constructor' => 'fromConfig',
   ];
-  $info['campaignion_logcrm.payment_exporter']['class'] = PaymentExporter::class;
+  $info['campaignion_logcrm.payment_exporter'] = [
+    'class' => PaymentExporter::class,
+    'arguments' => [
+      '@campaignion_logcrm.submission_exporter',
+    ],
+  ];
   $info['campaignion_logcrm.submission_exporter'] = [
     'class' => SubmissionExporter::class,
     'arguments' => [
@@ -112,13 +118,12 @@ function campaignion_logcrm_campaignion_newsletters_provider_info() {
  * Implements hook_webform_submission_insert().
  */
 function campaignion_logcrm_webform_submission_insert($node, $submission) {
-  // Send submission event.
-  $e = Event::fromSubmission(new Submission($node, $submission));
-  QueueItem::byData([
-    'type' => 'webform_submission',
-    'id' => $submission->sid,
-    'event' => $e,
-  ])->save();
+  $queue = Container::get()->loadService('campaignion_logcrm.queue');
+  $queue->addItem(
+    'webform_submission',
+    $submission->sid,
+    Event::fromSubmission(new Submission($node, $submission)),
+  );
 }
 
 /**
@@ -132,11 +137,12 @@ function campaignion_logcrm_webform_submission_update($node, $submission) {
  * Implements hook_webform_confirm_email_email_confirmed().
  */
 function campaignion_logcrm_webform_confirm_email_email_confirmed($node, $submission) {
-  QueueItem::byData([
-    'type' => 'webform_submission_confirmed',
-    'id' => $submission->sid,
-    'event' => Event::fromSubmissionConfirmation(new Submission($node, $submission)),
-  ])->save();
+  $queue = Container::get()->loadService('campaignion_logcrm.queue');
+  $queue->addItem(
+    'webform_submission_confirmed',
+    $submission->sid,
+    Event::fromSubmissionConfirmation(new Submission($node, $submission)),
+  );
 }
 
 /**
@@ -145,15 +151,57 @@ function campaignion_logcrm_webform_confirm_email_email_confirmed($node, $submis
 function campaignion_logcrm_payment_status_change(Payment $payment, PaymentStatusItem $previous_status_item) {
   $statusChangedToSuccess = $payment->getStatus()->status == PAYMENT_STATUS_SUCCESS && $previous_status_item->status != PAYMENT_STATUS_SUCCESS;
   $hasContextObj = $payment->contextObj instanceof WebformPaymentContext;
-  if (!$statusChangedToSuccess || !$hasContextObj)
+  if (!$statusChangedToSuccess || !$hasContextObj) {
     return;
-  // Send payment event.
-  $e = Event::fromPayment($payment);
-  QueueItem::byData([
-    'type' => 'payment',
-    'id' => $payment->pid,
-    'event' => $e,
-  ])->save();
+  }
+  $exporter = Container::get()->loadService('campaignion_logcrm.payment_exporter');
+  // Queue the payment success event for sending.
+  $queue = Container::get()->loadService('campaignion_logcrm.queue');
+  $queue->addItem('payment', $payment->pid, $exporter->createSuccessEvent($payment));
+}
+
+/**
+ * Implements hook_payment_insert().
+ */
+function campaignion_logcrm_payment_insert(Payment $payment) {
+  return campaignion_logcrm_payment_update($payment);
+}
+
+/**
+ * Implements hook_payment_update().
+ */
+function campaignion_logcrm_payment_update(Payment $payment) {
+  if (!$payment->contextObj instanceof WebformPaymentContext) {
+    return;
+  }
+  $exporter = Container::get()->loadService('campaignion_logcrm.payment_exporter');
+  $queue = Container::get()->loadService('campaignion_logcrm.queue');
+  $last_psiid_handled = $payment->original->psiid_last ?? 0;
+  $pending_after_new = FALSE;
+  $previous_item = NULL;
+  foreach ($payment->statuses as $item) {
+    if (payment_status_is_or_has_ancestor($item->status, PAYMENT_STATUS_NEW)) {
+      $pending_after_new = FALSE;
+    }
+    if (payment_status_is_or_has_ancestor($item->status, PAYMENT_STATUS_PENDING)) {
+      $pending_after_new = TRUE;
+      // Don’t send PENDING statuses themselves.
+      $previous_item = $item;
+      continue;
+    }
+    // Skip anything that has already been sent.
+    if ($item->psiid <= $last_psiid_handled) {
+      $previous_item = $item;
+      continue;
+    }
+    // Skip anything before PENDING unless it’s a SUCCESS.
+    if (!$pending_after_new && !payment_status_is_or_has_ancestor($item->status, PAYMENT_STATUS_SUCCESS)) {
+      $previous_item = $item;
+      continue;
+    }
+    $queue->addItem('payment_status_item', $item->psiid, $exporter->createStatusChangeEvent($payment, $previous_item));
+    $previous_item = $item;
+  }
 }
 
 /**

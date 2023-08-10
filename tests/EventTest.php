@@ -2,6 +2,7 @@
 
 namespace Drupal\campaignion_logcrm;
 
+use Drupal\campaignion_logcrm\Tests\MockSubmission;
 use Drupal\little_helpers\Webform\Submission;
 
 require_once drupal_get_path('module', 'webform') . '/includes/webform.components.inc';
@@ -35,15 +36,7 @@ class EventTest extends \DrupalUnitTestCase {
       ],
       5 => ['type' => 'email', 'form_key' => 'email'],
     ];
-    foreach ($node->webform['components'] as $cid => &$component) {
-      webform_component_defaults($component);
-      $component += [
-        'pid' => 0,
-        'cid' => $cid,
-        'name' => $component['form_key'],
-        'weight' => 0,
-      ];
-    }
+    MockSubmission::prepareComponents($node);
     node_save($node);
     $this->node = $node;
 
@@ -144,53 +137,6 @@ class EventTest extends \DrupalUnitTestCase {
       ],
       '_submitted_at' => '2015-10-27T12:27:25+0000',
       '_completed_at' => '2015-10-27T12:27:26+0000',
-    ], $a);
-  }
-
-  /**
-   * Test creating a payment event.
-   */
-  public function testFromPayment() {
-    $method = (object) [
-      'controller' => (object) ['name' => 'test controller'],
-      'title_specific' => 'test specific',
-      'title_generic' => 'test generic',
-    ];
-    $payment = $this->getMockBuilder('\Payment')
-      ->setConstructorArgs([
-        ['pid' => 1, 'currency_code' => 'EUR', 'method' => $method],
-      ])->getMock();
-    $status = (object) [
-      'created' => 1445948845,
-      'status' => 'test success',
-    ];
-    $payment->method('getStatus')->willReturn($status);
-    $payment->method('totalAmount')->willReturn(42);
-    $payment->contextObj = $this->getMockBuilder('\Drupal\webform_paymethod_select\WebformPaymentContext')
-      ->disableOriginalConstructor()
-      ->getMock();
-    $payment->contextObj->method('getSubmission')->willReturn($this->submission);
-
-    $e = Event::fromPayment($payment);
-    $a = $e->toArray();
-    unset($a['date']);
-    $this->assertEquals([
-      'uuid' => 'test-uuid',
-      'type' => 'payment_success',
-      'action' => [
-        'uuid' => $this->node->uuid,
-        'title' => $this->node->title,
-        'needs_confirmation' => FALSE,
-        'type' => 'webform',
-        'type_title' => 'Webform',
-      ],
-      'pid' => 1,
-      'currency_code' => 'EUR',
-      'total_amount' => 42,
-      'status' => 'test success',
-      'method_specific' => 'test specific',
-      'method_generic' => 'test generic',
-      'controller' => 'test controller',
     ], $a);
   }
 
