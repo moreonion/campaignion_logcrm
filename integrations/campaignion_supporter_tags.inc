@@ -16,7 +16,10 @@ function campaignion_supporter_tags_campaignion_logcrm_event_data_alter(array &$
     if (!empty($node->supporter_tags)) {
       $wrapped_node = entity_metadata_wrapper('node', $node);
       foreach ($wrapped_node->supporter_tags->value() as $term) {
-        $data['action']['tags'][] = $term->name;
+        // References to deleted terms yield NULL values here: Remove them.
+        if ($term) {
+          $data['action']['tags'][] = $term->name;
+        }
       }
     }
   }
