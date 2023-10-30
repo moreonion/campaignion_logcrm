@@ -20,7 +20,11 @@ function campaignion_source_tags_campaignion_logcrm_event_data_alter(array &$dat
       $wrapped_node = entity_metadata_wrapper('node', $node);
       $uuid_to_property = array_flip($tags_map);
       foreach ($wrapped_node->supporter_tags->value() as $term) {
-        // Add each tag with a matching parent to its tags-array.
+        // References to deleted terms yield NULL values here: Remove them.
+        if (!$term) {
+          continue;
+        }
+        // Add each tag with a matching parent to- its tags-array.
         foreach (taxonomy_get_parents($term->tid) as $pterm) {
           if ($property = $uuid_to_property[$pterm->uuid] ?? NULL) {
             $data['action']["{$property}_tags"][] = $term->name;
