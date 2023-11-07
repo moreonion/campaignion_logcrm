@@ -94,12 +94,9 @@ class EventTest extends \DrupalUnitTestCase {
     unset($a['date']);
     $nid = $submission->node->nid;
     $link_options = ['absolute' => TRUE, 'alias' => FALSE];
-    $this->assertEquals([
+    $expected_data = [
+      'version' => '1.0',
       'is_draft' => FALSE,
-      'text' => 'TestText',
-      'number' => 57,
-      'email' => 'test@example.com',
-      'email_opt_in' => 'radios:opt-in',
       'uuid' => 'test-uuid',
       'type' => 'form_submission',
       'action' => [
@@ -115,12 +112,12 @@ class EventTest extends \DrupalUnitTestCase {
       'tracking' => (object) [
         'tags' => [],
       ],
-      '_links' => [
+      'links' => [
         'action' => url("node/$nid", $link_options),
         'action_pretty_url' => url("node/$nid", ['alias' => TRUE] + $link_options),
         'submission' => url("node/$nid/submission/{$submission->sid}", $link_options),
       ],
-      '_optins' => [
+      'optins' => [
         4 => [
           'address' => 'test@example.com',
           'operation' => 'opt-in',
@@ -135,9 +132,20 @@ class EventTest extends \DrupalUnitTestCase {
           'ip_address' => '127.0.0.1',
         ],
       ],
-      '_submitted_at' => '2015-10-27T12:27:25+0000',
-      '_completed_at' => '2015-10-27T12:27:26+0000',
-    ], $a);
+      'submitted_at' => '2015-10-27T12:27:25+0000',
+      'completed_at' => '2015-10-27T12:27:26+0000',
+      'data' => [
+        'text' => 'TestText',
+        'number' => 57,
+        'email' => 'test@example.com',
+        'email_opt_in' => 'radios:opt-in',
+      ],
+    ];
+    foreach (['completed_at', 'submitted_at', 'links', 'optins'] as $key) {
+      $expected_data["_$key"] = $expected_data[$key];
+    }
+    $expected_data += $expected_data['data'];
+    $this->assertEquals($expected_data, $a);
   }
 
 }
