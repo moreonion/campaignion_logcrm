@@ -71,7 +71,6 @@ class SubmissionExporter {
    *   JSON serializable data representing the submission.
    */
   public function data(Submission $submission) {
-    $data['version'] = '1.0';
     $data['data'] = [];
     foreach ($submission->node->webform['components'] as $cid => $component) {
       $exporter = $this->loader->loadService($component['type'], FALSE) ?: $this->loader->loadService('verbatim');
