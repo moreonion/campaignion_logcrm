@@ -48,6 +48,7 @@ class ModuleTest extends DrupalUnitTestCase {
         'controller' => new DummyController(),
       ]),
     ]);
+    entity_save('payment', $payment);
     $payment->contextObj = $this->createMock(WebformPaymentContext::class);
     $payment->contextObj->method('toContextData')->willReturn([]);
     $success_event = new Event('payment_success');
@@ -57,9 +58,10 @@ class ModuleTest extends DrupalUnitTestCase {
     // Expect one call from the payment status change.
     $this->queue->expects($this->at(0))->method('addItem')
       ->with('payment', $payment->pid, $success_event);
-    // Expect one call from the entity_save().
+    // Expect one call from the entity_save() for the success status.
+    $predicted_success_psiid = $payment->getStatus()->psiid + 2;
     $this->queue->expects($this->at(1))->method('addItem')
-      ->with('payment_status_item', $payment->getStatus()->psiid + 1, $change_event);
+      ->with('payment_status_item', $predicted_success_psiid, $change_event);
     $payment->method->controller->name = 'controller_machine_name';
     $payment->setLineItem(new \PaymentLineItem([
       'name' => 'foo',
