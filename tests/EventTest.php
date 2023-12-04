@@ -35,6 +35,7 @@ class EventTest extends \DrupalUnitTestCase {
         ],
       ],
       5 => ['type' => 'email', 'form_key' => 'email'],
+      6 => ['type' => 'text', 'form_key' => 'tracking'],
     ];
     MockSubmission::prepareComponents($node);
     node_save($node);
@@ -87,6 +88,7 @@ class EventTest extends \DrupalUnitTestCase {
       3 => [NULL],
       4 => ['radios:opt-in'],
       5 => ['test@example.com'],
+      6 => ['overridden by tracking'],
     ];
 
     $e = Event::fromSubmission($submission);
@@ -139,6 +141,7 @@ class EventTest extends \DrupalUnitTestCase {
         'number' => 57,
         'email' => 'test@example.com',
         'email_opt_in' => 'radios:opt-in',
+        'tracking' => 'overridden by tracking',
       ],
     ];
     foreach (['completed_at', 'submitted_at', 'links', 'optins'] as $key) {
