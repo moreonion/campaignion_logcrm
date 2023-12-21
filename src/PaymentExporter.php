@@ -7,6 +7,15 @@ namespace Drupal\campaignion_logcrm;
  */
 class PaymentExporter {
 
+  const INTERVAL_UNITS = [
+    'monthly' => [1, 'M'],
+    'yearly' => [1, 'Y'],
+    'quarterly' => [3, 'M'],
+  ];
+
+  /**
+   * Submission exporter used to generate the action data.
+   */
   protected $submissionExporter;
 
   /**
@@ -36,7 +45,11 @@ class PaymentExporter {
       'method_specific' => $payment->method->title_specific,
       'method_generic' => $payment->method->title_generic,
       'controller' => $controller->name,
+      'line_items' => [],
     ];
+    foreach ($payment->line_items as $item) {
+      $data['line_items'][] = $this->lineItemData($item);
+    }
     if (webform_paymethod_select_implements_data_interface($controller)) {
       $data['payment_data'] = $controller->webformData($payment);
     }
@@ -44,6 +57,29 @@ class PaymentExporter {
     // Let other modules alter the data.
     // Deprecated: Use campaignion_logcrm_event_data_alter() instead.
     drupal_alter('campaignion_logcrm_payment_event_data', $data, $payment);
+    return $data;
+  }
+
+  /**
+   * Generate data for a payment line item.
+   */
+  public function lineItemData(\PaymentLineItem $item) : array {
+    $data = [
+      'name' => $item->name,
+      'amount' => (string) $item->amount,
+      'quantity' => (string) $item->quantity,
+      'tax_rate' => (string) $item->tax_rate,
+      'recurrence_interval' => NULL,
+    ];
+    if (($recurrence = $item->recurrence ?? NULL) && $recurrence->interval_unit) {
+      if ($f = static::INTERVAL_UNITS[$recurrence->interval_unit] ?? NULL) {
+        list($unit_factor, $unit) = $f;
+        $factor = $unit_factor * ($recurrence->interval_value ?? 1);
+        if ($factor > 0) {
+          $data['recurrence_interval'] = "P{$factor}{$unit}";
+        }
+      }
+    }
     return $data;
   }
 

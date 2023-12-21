@@ -53,6 +53,7 @@ class EventTest extends \DrupalUnitTestCase {
     ];
     $submissions = [$s->sid => $s];
     campaignion_opt_in_webform_submission_load($submissions);
+    $this->assertNotEmpty($s->opt_in);
     $this->submission = new Submission($node, $s);
   }
 
