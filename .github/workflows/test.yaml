@@ -52,7 +52,7 @@ jobs:
         ln -s $REPO $ROOT/sites/all/modules/module_under_test
         cd $ROOT
         curl https://www.drupal.org/files/issues/1891356-drupal_static_reset-on-module-changes-30-D7.patch | patch -p1
-        drush dl campaignion-7.x-2.20 i18n libraries little_helpers-2.0-alpha11 manual_direct_debit ultimate_cron webform_paymethod_select webform_submission_uuid xautoload
+        drush dl campaignion-7.x-2.38 i18n libraries little_helpers-2.0-alpha16 manual_direct_debit ultimate_cron webform_paymethod_select webform_submission_uuid xautoload
         drush --yes pm-enable campaignion_logcrm campaignion_newsletters campaignion_supporter_tags campaignion_source_tags manual_direct_debit_uk wps_test_method
     - name: Run phpunit tests
       run: UPAL_ROOT=$ROOT UPAL_WEB_URL=http://127.0.0.1 XDEBUG_MODE=coverage phpunit --bootstrap=$COMPOSER_HOME/vendor/torotil/upal/bootstrap.php --coverage-clover=coverage.xml .
