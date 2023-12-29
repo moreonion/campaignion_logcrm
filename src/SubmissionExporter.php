@@ -71,11 +71,12 @@ class SubmissionExporter {
    *   JSON serializable data representing the submission.
    */
   public function data(Submission $submission) {
-    $data = [];
+    $data['data'] = [];
     foreach ($submission->node->webform['components'] as $cid => $component) {
       $exporter = $this->loader->loadService($component['type'], FALSE) ?: $this->loader->loadService('verbatim');
       if ($value = $exporter->value($component, $submission)) {
         $data[$component['form_key']] = $value;
+        $data['data'][$component['form_key']] = $value;
       }
     }
     $data['_submitted_at'] = date(DATE_ISO8601, $submission->submitted);
@@ -94,6 +95,11 @@ class SubmissionExporter {
       'submission' => url("node/$nid/submission/{$submission->sid}", $link_options),
     ];
     $data['_optins'] = $this->optInExporter->export($submission);
+    foreach (['submitted_at', 'completed_at', 'links', 'optins'] as $key) {
+      if (!isset($data[$key]) && isset($data["_$key"])) {
+        $data[$key] = $data["_$key"];
+      }
+    }
     return $data;
   }
 

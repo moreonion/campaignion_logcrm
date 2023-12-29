@@ -6,6 +6,9 @@ use Drupal\little_helpers\Services\Container;
 use Drupal\little_helpers\Webform\Submission;
 
 class Event {
+
+  const VERSION = '1.1.0';
+
   public $type;
   public $date;
   public $data;
@@ -50,6 +53,7 @@ class Event {
     return [
       'type' => $this->type,
       'date' => date('c', $d),
+      'version' => static::VERSION,
     ] + $this->data;
   }
 }
