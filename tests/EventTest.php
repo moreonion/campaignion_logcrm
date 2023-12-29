@@ -74,7 +74,7 @@ class EventTest extends \DrupalUnitTestCase {
     unset($d['date']);
     $this->assertEquals([
       'type' => 'form_submission_confirmed',
-      'version' => '1.1.0',
+      'version' => '1.2.0',
       'uuid' => 'test-uuid',
     ], $d);
   }
@@ -99,7 +99,7 @@ class EventTest extends \DrupalUnitTestCase {
     $nid = $submission->node->nid;
     $link_options = ['absolute' => TRUE, 'alias' => FALSE];
     $expected_data = [
-      'version' => '1.1.0',
+      'version' => '1.2.0',
       'is_draft' => FALSE,
       'uuid' => 'test-uuid',
       'type' => 'form_submission',
