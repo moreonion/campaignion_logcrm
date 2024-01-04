@@ -163,7 +163,8 @@ class PaymentExporterTest extends DrupalUnitTestCase {
    */
   public function testLineItemData() {
     $exporter = new PaymentExporter($this->createMock(SubmissionExporter::class));
-
+    $payment = $this->createMock(\Payment::class);
+    $payment->pid = 123;
     $cases = [
       ['unit' => 'daily', 'value' => 7, 'interval' => 'P7D'],
       ['unit' => 'weekly', 'value' => 4, 'interval' => 'P4W'],
@@ -190,7 +191,7 @@ class PaymentExporterTest extends DrupalUnitTestCase {
         'amount' => '5',
         'recurrence_interval' => $case['interval'],
         'tax_rate' => '0',
-      ], $exporter->lineItemData($item));
+      ], $exporter->lineItemData($item, $payment));
     }
   }
 

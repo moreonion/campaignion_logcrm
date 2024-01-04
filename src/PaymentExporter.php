@@ -52,7 +52,7 @@ class PaymentExporter {
       'line_items' => [],
     ];
     foreach ($payment->line_items as $item) {
-      $data['line_items'][] = $this->lineItemData($item);
+      $data['line_items'][] = $this->lineItemData($item, $payment);
     }
     if (webform_paymethod_select_implements_data_interface($controller)) {
       $data['payment_data'] = $controller->webformData($payment);
@@ -67,7 +67,7 @@ class PaymentExporter {
   /**
    * Generate data for a payment line item.
    */
-  public function lineItemData(\PaymentLineItem $item) : array {
+  public function lineItemData(\PaymentLineItem $item, \Payment $payment) : array {
     $data = [
       'name' => $item->name,
       'amount' => (string) $item->amount,
@@ -81,6 +81,18 @@ class PaymentExporter {
         if ($factor > 0) {
           $data['recurrence_interval'] = "P{$factor}{$unit}";
         }
+      }
+      else {
+        watchdog(
+          'campaignion_logcrm',
+          'Unknown recurrence interval unit (pid=%pid, name="%name"): %unit. Forwarding as one-off.',
+          [
+            '%unit' => $recurrence->interval_unit,
+            '%pid' => $payment->pid,
+            '%name' => $item->name
+          ],
+          WATCHDOG_ERROR,
+        );
       }
     }
     return $data;
