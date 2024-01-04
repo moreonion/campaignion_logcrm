@@ -165,10 +165,11 @@ class PaymentExporterTest extends DrupalUnitTestCase {
     $exporter = new PaymentExporter($this->createMock(SubmissionExporter::class));
 
     $cases = [
+      ['unit' => 'daily', 'value' => 7, 'interval' => 'P7D'],
+      ['unit' => 'weekly', 'value' => 4, 'interval' => 'P4W'],
       ['unit' => 'monthly', 'value' => 1, 'interval' => 'P1M'],
-      ['unit' => 'quarterly', 'value' => 1, 'interval' => 'P3M'],
+      ['unit' => 'monthly', 'value' => 3, 'interval' => 'P3M'],
       ['unit' => 'monthly', 'value' => 6, 'interval' => 'P6M'],
-      ['unit' => 'quarterly', 'value' => 2, 'interval' => 'P6M'],
       ['unit' => 'yearly', 'value' => 2, 'interval' => 'P2Y'],
       ['unit' => 'unknown', 'value' => 0, 'interval' => NULL],
       ['unit' => 'monthly', 'value' => 0, 'interval' => NULL],

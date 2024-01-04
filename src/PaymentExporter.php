@@ -7,10 +7,14 @@ namespace Drupal\campaignion_logcrm;
  */
 class PaymentExporter {
 
+  /**
+   * Map interval units used by payment_recurrence to ISO 8601 interval units.
+   */
   const INTERVAL_UNITS = [
-    'monthly' => [1, 'M'],
-    'yearly' => [1, 'Y'],
-    'quarterly' => [3, 'M'],
+    'yearly' => 'Y',
+    'monthly' => 'M',
+    'daily' => 'D',
+    'weekly' => 'W',
   ];
 
   /**
@@ -72,9 +76,8 @@ class PaymentExporter {
       'recurrence_interval' => NULL,
     ];
     if (($recurrence = $item->recurrence ?? NULL) && $recurrence->interval_unit) {
-      if ($f = static::INTERVAL_UNITS[$recurrence->interval_unit] ?? NULL) {
-        list($unit_factor, $unit) = $f;
-        $factor = $unit_factor * ($recurrence->interval_value ?? 1);
+      if ($unit = static::INTERVAL_UNITS[$recurrence->interval_unit] ?? NULL) {
+        $factor = $recurrence->interval_value ?? 1;
         if ($factor > 0) {
           $data['recurrence_interval'] = "P{$factor}{$unit}";
         }
