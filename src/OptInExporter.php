@@ -97,9 +97,13 @@ class OptInExporter {
         $opt_in['unsubscribe_unknown'] = variable_get_value('campaignion_newsletters_unsubscribe_unknown');
         $opt_in['trigger_opt_in_email'] = empty($component['extra']['opt_in_implied']);
         $opt_in['trigger_welcome_email'] = !empty($component['extra']['send_welcome']);
-        $opt_in['lists'] = array_values(array_map(function ($list_id) use ($list_identifiers) {
-          return $list_identifiers[$list_id];
-        }, $component['extra']['lists']));
+        $opt_in['lists'] = array_map(function ($list_id) use ($list_identifiers) {
+          return $list_identifiers[$list_id] ?? NULL;
+        }, $component['extra']['lists']);
+        // Remove lists that could not be mapped: Webform component is referencing a deleted list.
+        $opt_in['lists'] = array_filter($opt_in['lists']);
+        // Make this an indexed array so that it will be JSON encoded as array.
+        $opt_in['lists'] = array_values($opt_in['lists']);
         $opt_in['ip_address'] = $this->ipAddress;
       }
     }
