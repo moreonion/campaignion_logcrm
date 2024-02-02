@@ -82,6 +82,15 @@ class FormSubmissionPaymentTest extends DrupalUnitTestCase {
       'method_specific' => '',
       'method_generic' => '',
       'controller' => '\\Drupal\\wps_test_method\\DummyController',
+      'line_items' => [
+        [
+          'name' => '',
+          'amount' => '3',
+          'quantity' => '1',
+          'tax_rate' => '0',
+          'recurrence_interval' => NULL,
+        ],
+      ],
     ], $payment_data);
   }
 

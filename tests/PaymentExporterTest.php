@@ -55,6 +55,15 @@ class PaymentExporterTest extends DrupalUnitTestCase {
       'action' => [
         'uuid' => 'action-uuid',
       ],
+      'line_items' => [
+        [
+          'name' => 'foo',
+          'amount' => '3.5',
+          'quantity' => '2',
+          'tax_rate' => 0,
+          'recurrence_interval' => NULL,
+        ],
+      ],
     ], $event->data);
 
     $previous_status_item = $payment->getStatus();
@@ -70,6 +79,15 @@ class PaymentExporterTest extends DrupalUnitTestCase {
       'method_generic' => 'Test payment method',
       'controller' => 'controller_machine_name',
       'uuid' => 'submission-uuid',
+      'line_items' => [
+        [
+          'name' => 'foo',
+          'amount' => '3.5',
+          'quantity' => '2',
+          'tax_rate' => 0,
+          'recurrence_interval' => NULL,
+        ],
+      ],
     ], $event->data);
   }
 
@@ -111,6 +129,15 @@ class PaymentExporterTest extends DrupalUnitTestCase {
       'method_specific' => 'Dummy method',
       'method_generic' => 'Test payment method',
       'controller' => '\\Drupal\\manual_direct_debit_uk\\AccountDataController',
+      'line_items' => [
+        [
+          'name' => 'foo',
+          'quantity' => '2',
+          'amount' => '3.5',
+          'tax_rate' => '0',
+          'recurrence_interval' => NULL,
+        ],
+      ],
       // Implementation in PaymentExporter based $controller->webformData().
       'payment_data' => [
         'account_holder' => 'Account holder name',
@@ -129,6 +156,43 @@ class PaymentExporterTest extends DrupalUnitTestCase {
         'payment_date' => '15',
       ],
     ], $data);
+  }
+
+  /**
+   * Test generating line item data.
+   */
+  public function testLineItemData() {
+    $exporter = new PaymentExporter($this->createMock(SubmissionExporter::class));
+    $payment = $this->createMock(\Payment::class);
+    $payment->pid = 123;
+    $cases = [
+      ['unit' => 'daily', 'value' => 7, 'interval' => 'P7D'],
+      ['unit' => 'weekly', 'value' => 4, 'interval' => 'P4W'],
+      ['unit' => 'monthly', 'value' => 1, 'interval' => 'P1M'],
+      ['unit' => 'monthly', 'value' => 3, 'interval' => 'P3M'],
+      ['unit' => 'monthly', 'value' => 6, 'interval' => 'P6M'],
+      ['unit' => 'yearly', 'value' => 2, 'interval' => 'P2Y'],
+      ['unit' => 'unknown', 'value' => 0, 'interval' => NULL],
+      ['unit' => 'monthly', 'value' => 0, 'interval' => NULL],
+    ];
+    foreach ($cases as $case) {
+      $item = new \PaymentLineItem([
+        'name' => 'interval-test',
+        'quantity' => 1.0,
+        'amount' => 5.0,
+        'recurrence' => (object) [
+          'interval_unit' => $case['unit'],
+          'interval_value' => $case['value'],
+        ],
+      ]);
+      $this->assertEqual([
+        'name' => 'interval-test',
+        'quantity' => '1',
+        'amount' => '5',
+        'recurrence_interval' => $case['interval'],
+        'tax_rate' => '0',
+      ], $exporter->lineItemData($item, $payment));
+    }
   }
 
 }

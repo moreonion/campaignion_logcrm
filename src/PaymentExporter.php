@@ -7,6 +7,19 @@ namespace Drupal\campaignion_logcrm;
  */
 class PaymentExporter {
 
+  /**
+   * Map interval units used by payment_recurrence to ISO 8601 interval units.
+   */
+  const INTERVAL_UNITS = [
+    'yearly' => 'Y',
+    'monthly' => 'M',
+    'daily' => 'D',
+    'weekly' => 'W',
+  ];
+
+  /**
+   * Submission exporter used to generate the action data.
+   */
   protected $submissionExporter;
 
   /**
@@ -36,7 +49,11 @@ class PaymentExporter {
       'method_specific' => $payment->method->title_specific,
       'method_generic' => $payment->method->title_generic,
       'controller' => $controller->name,
+      'line_items' => [],
     ];
+    foreach ($payment->line_items as $item) {
+      $data['line_items'][] = $this->lineItemData($item, $payment);
+    }
     if (webform_paymethod_select_implements_data_interface($controller)) {
       $data['payment_data'] = $controller->webformData($payment);
     }
@@ -44,6 +61,40 @@ class PaymentExporter {
     // Let other modules alter the data.
     // Deprecated: Use campaignion_logcrm_event_data_alter() instead.
     drupal_alter('campaignion_logcrm_payment_event_data', $data, $payment);
+    return $data;
+  }
+
+  /**
+   * Generate data for a payment line item.
+   */
+  public function lineItemData(\PaymentLineItem $item, \Payment $payment) : array {
+    $data = [
+      'name' => $item->name,
+      'amount' => (string) $item->amount,
+      'quantity' => (string) $item->quantity,
+      'tax_rate' => (string) $item->tax_rate,
+      'recurrence_interval' => NULL,
+    ];
+    if (($recurrence = $item->recurrence ?? NULL) && $recurrence->interval_unit) {
+      if ($unit = static::INTERVAL_UNITS[$recurrence->interval_unit] ?? NULL) {
+        $factor = $recurrence->interval_value ?? 1;
+        if ($factor > 0) {
+          $data['recurrence_interval'] = "P{$factor}{$unit}";
+        }
+      }
+      else {
+        watchdog(
+          'campaignion_logcrm',
+          'Unknown recurrence interval unit (pid=%pid, name="%name"): %unit. Forwarding as one-off.',
+          [
+            '%unit' => $recurrence->interval_unit,
+            '%pid' => $payment->pid,
+            '%name' => $item->name
+          ],
+          WATCHDOG_ERROR,
+        );
+      }
+    }
     return $data;
   }
 
