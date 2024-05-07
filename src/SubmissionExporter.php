@@ -43,7 +43,9 @@ class SubmissionExporter {
    */
   public function actionData(Submission $submission) {
     $node = $submission->node;
+    $tnid = $node->tnid ?: $node->nid;
     $data = [
+      'id' => "N{$tnid}",
       'uuid' => $node->uuid,
       'title' => $node->title,
       'needs_confirmation' => $submission->webform->needsConfirmation(),

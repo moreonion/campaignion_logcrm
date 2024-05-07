@@ -74,7 +74,7 @@ class EventTest extends \DrupalUnitTestCase {
     unset($d['date']);
     $this->assertEquals([
       'type' => 'form_submission_confirmed',
-      'version' => '1.2.0',
+      'version' => '1.3.0',
       'uuid' => 'test-uuid',
     ], $d);
   }
@@ -99,11 +99,12 @@ class EventTest extends \DrupalUnitTestCase {
     $nid = $submission->node->nid;
     $link_options = ['absolute' => TRUE, 'alias' => FALSE];
     $expected_data = [
-      'version' => '1.2.0',
+      'version' => '1.3.0',
       'is_draft' => FALSE,
       'uuid' => 'test-uuid',
       'type' => 'form_submission',
       'action' => [
+        'id' => "N{$this->node->nid}",
         'uuid' => $this->node->uuid,
         'title' => $this->node->title,
         'needs_confirmation' => FALSE,
@@ -151,6 +152,17 @@ class EventTest extends \DrupalUnitTestCase {
     }
     $expected_data += $expected_data['data'];
     $this->assertEquals($expected_data, $a);
+  }
+
+  /**
+   * Test the value of the action ID when exporting a submission.
+   */
+  public function testActionId() {
+    $data = Event::fromSubmission($this->submission)->toArray();
+    $this->assertEqual("N{$this->node->nid}", $data['action']['id']);
+    $this->node->tnid = 424242;
+    $data = Event::fromSubmission($this->submission)->toArray();
+    $this->assertEqual("N{$this->node->tnid}", $data['action']['id']);
   }
 
 }
