@@ -44,4 +44,19 @@ class ClientTest extends DrupalUnitTestCase {
     $api->sendEvent($event);
   }
 
+  /**
+   * Test geting the newsletter lists.
+   */
+  public function testGetNewsletterLists() {
+    $api = $this->instrumentedApi();
+    $api->expects($this->once())
+      ->method('get')
+      ->with(
+        $this->equalTo('/newsletter/lists'),
+        $this->equalTo(['organization' => 'impact-stack>example'])
+      )->willReturn(['lists' => "lists-content"]);
+    $return = $api->getNewslettersLists();
+    $this->assertEquals('lists-content', $return);
+  }
+
 }

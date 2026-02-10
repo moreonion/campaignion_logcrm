@@ -48,8 +48,7 @@ class NewsletterProvider implements ProviderInterface {
    */
   public function getLists() {
     $lists = [];
-    $query['organization'] = variable_get_value('campaignion_organization');
-    foreach ($this->client->get('/newsletter/lists', $query)['lists'] as $list_data) {
+    foreach ($this->client->getNewslettersLists() as $list_data) {
       $lists[] = NewsletterList::fromData([
         'identifier' => $list_data['global_identifier'],
         'title' => $list_data['title'],
