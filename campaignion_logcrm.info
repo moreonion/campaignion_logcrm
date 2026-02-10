@@ -9,5 +9,6 @@ dependencies[] = campaignion:campaignion_opt_in (>=2.19-alpha1)
 dependencies[] = libraries
 dependencies[] = little_helpers:little_helpers (>=2.0-alpha11)
 dependencies[] = ultimate_cron
+dependencies[] = variable:variable
 dependencies[] = webform_paymethod_select
 dependencies[] = webform_submission_uuid
