@@ -60,4 +60,13 @@ class Client extends RestClient {
     return $this->post('/events', [], $event_data);
   }
 
+  /**
+   * Get newsletter lists visible to this organization.
+   * @return array
+   */
+  public function getNewslettersLists() {
+    $query['organization'] = $this->organization;
+    return $this->get('/newsletter/lists', $query)['lists'];
+  }
+
 }
