@@ -24,6 +24,11 @@ class SubmissionExporter {
    */
   protected $optInExporter;
 
+  protected static function strEndsWith(str $haystack, str $needle) {
+    // Suppress the warning created when $needle is longer than $haystack.
+    return !$needle || @substr_compare($haystack, $needle, -strlen($needle)) === 0;
+  }
+
   /**
    * Create a new exporter.
    */
@@ -101,6 +106,12 @@ class SubmissionExporter {
       if (!isset($data[$key]) && isset($data["_$key"])) {
         $data[$key] = $data["_$key"];
       }
+    }
+    // Check if the submission is expired.
+    $email = $data['data']['email'] ?? NULL;
+    if ($email && (static::strEndsWith($email, '@deleted') || static::strEndsWith($email, '@form-submission'))) {
+      // No expiry date is stored with submissions in IST1, so just set the unix epoch 0.
+      $data['expired_at'] = '1970-01-01T00:00:00.000Z';
     }
     return $data;
   }
